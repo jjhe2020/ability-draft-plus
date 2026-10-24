@@ -22,7 +22,7 @@ i18n.use(initReactI18next).init({
     fi: { overlay: fiOverlay },
   },
   defaultNS: 'overlay',
-  lng: 'en',
+  lng: 'zh-CN',
   fallbackLng: 'en',
   interpolation: {
     escapeValue: false,

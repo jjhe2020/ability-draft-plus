@@ -15,12 +15,10 @@ export function MapperPage({ onNavigate }: PageProps) {
             <Map className="h-5 w-5" />
             {t('mapper.title')}
           </CardTitle>
-          <CardDescription>
-            {t('mapper.description')}
-          </CardDescription>
+          <CardDescription>{t('mapper.description')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <MapperWizard mode="user" onDone={() => onNavigate('dashboard')} />
+          <MapperWizard mode="user" onDone={() => onNavigate?.('dashboard')} />
         </CardContent>
       </Card>
     </div>

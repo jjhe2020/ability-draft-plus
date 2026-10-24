@@ -23,7 +23,7 @@ const INSTRUCTIONS = [
   'mapper.anchor.instruction2',
   'mapper.anchor.instruction3',
   'mapper.anchor.instruction4',
-]
+] as const
 
 export function StepAnchorCalibration({
   imageBase64,
@@ -68,9 +68,7 @@ export function StepAnchorCalibration({
     setClicks([])
   }
 
-  const currentInstruction = clicks.length < ANCHOR_TOTAL
-    ? t(INSTRUCTIONS[clicks.length])
-    : ''
+  const currentInstruction = clicks.length < ANCHOR_TOTAL ? t(INSTRUCTIONS[clicks.length]) : ''
 
   return (
     <div className="space-y-4">

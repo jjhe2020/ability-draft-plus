@@ -1,5 +1,5 @@
 {
-  "appTitle": "Dota 2 Ability Draft Plus",
+  "appTitle": "Dota 2 技能征召助手",
   "nav": {
     "dashboard": "仪表盘",
     "abilities": "技能",
@@ -44,5 +44,10 @@
     "tooltip": "在 Ko-fi 上支持开发者",
     "datdota": "支持 datdota",
     "datdotaTooltip": "在 Ko-fi 上支持 datdota（Windrun 数据来源）"
+  },
+  "errors": {
+    "title": "界面加载失败",
+    "unexpected": "发生了意外错误，请重试或切换页面。",
+    "details": "技术详情"
   }
 }

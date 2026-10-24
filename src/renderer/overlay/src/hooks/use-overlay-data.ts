@@ -92,7 +92,13 @@ export function useOverlayData(): OverlayState & {
     })
 
     const unsubSnapshot = window.electronApi.on('feedback:snapshotStatus', (data) => {
-      setSnapshotMessage(i18n.t(data.messageKey, data.params))
+      setSnapshotMessage(
+        i18n.t(data.messageKey, {
+          ...data.params,
+          ns: 'overlay',
+          defaultValue: i18n.t('overlay:snapshot.error', { error: '—' }),
+        }),
+      )
       setSnapshotIsError(data.error ?? false)
     })
 
@@ -108,7 +114,9 @@ export function useOverlayData(): OverlayState & {
 
   const triggerScan = (isInitialScan: boolean): void => {
     if (!overlayData) {
-      console.warn('[overlay] triggerScan called but overlayData is null — initial data not received yet')
+      console.warn(
+        '[overlay] triggerScan called but overlayData is null — initial data not received yet',
+      )
       return
     }
     setScanState('scanning')
@@ -117,7 +125,7 @@ export function useOverlayData(): OverlayState & {
     scanTimeoutRef.current = setTimeout(() => {
       scanTimeoutRef.current = null
       setScanState('error')
-      setScanError(i18n.t('status.timeoutMessage'))
+      setScanError(i18n.t('overlay:status.timeoutMessage'))
     }, SCAN_TIMEOUT_MS)
     // CRITICAL: the scanning state hides all overlay decorations (capture-mode CSS).
     // Wait two frames so the compositor has actually painted their removal before
@@ -140,7 +148,20 @@ export function useOverlayData(): OverlayState & {
     setScanError(null)
     setSelectedSpotHeroOrder(null)
     setSelectedModelHeroOrder(null)
-    setOverlayData((prev) => prev ? { ...prev, scanData: null, opCombinations: [], trapCombinations: [], heroSynergies: [], heroTraps: [], heroModels: [], heroesForMySpotUI: [] } : null)
+    setOverlayData((prev) =>
+      prev
+        ? {
+            ...prev,
+            scanData: null,
+            opCombinations: [],
+            trapCombinations: [],
+            heroSynergies: [],
+            heroTraps: [],
+            heroModels: [],
+            heroesForMySpotUI: [],
+          }
+        : null,
+    )
     // Clear the main-process draft session too, so a later Rescan doesn't diff
     // against this draft's cached pool.
     window.electronApi.send('overlay:reset')

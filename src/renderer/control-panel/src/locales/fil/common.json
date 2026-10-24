@@ -44,5 +44,10 @@
     "tooltip": "Suportahan ang developer sa Ko-fi",
     "datdota": "Suportahan ang datdota",
     "datdotaTooltip": "Suportahan ang datdota (Windrun data) sa Ko-fi"
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "unexpected": "An unexpected error occurred. Retry or switch pages.",
+    "details": "Technical details"
   }
 }

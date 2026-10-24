@@ -1,26 +1,29 @@
 import type { Table } from '@tanstack/react-table'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>
 }
 
-export function DataTablePagination<TData>({
-  table,
-}: DataTablePaginationProps<TData>) {
+export function DataTablePagination<TData>({ table }: DataTablePaginationProps<TData>) {
+  const { t } = useTranslation('data')
   return (
     <div className="flex items-center justify-between px-2">
       <div className="text-sm text-muted-foreground">
-        {table.getFilteredRowModel().rows.length} row(s)
+        {t('table.rows', { count: table.getFilteredRowModel().rows.length })}
       </div>
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
-          {table.getPageCount()}
+          {t('table.page', {
+            current: table.getState().pagination.pageIndex + 1,
+            total: Math.max(1, table.getPageCount()),
+          })}
         </span>
         <div className="flex items-center gap-1">
           <Button
+            aria-label={t('table.firstPage')}
             variant="outline"
             size="icon"
             className="h-8 w-8"
@@ -30,6 +33,7 @@ export function DataTablePagination<TData>({
             <ChevronsLeft className="h-4 w-4" />
           </Button>
           <Button
+            aria-label={t('table.previousPage')}
             variant="outline"
             size="icon"
             className="h-8 w-8"
@@ -39,6 +43,7 @@ export function DataTablePagination<TData>({
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
+            aria-label={t('table.nextPage')}
             variant="outline"
             size="icon"
             className="h-8 w-8"
@@ -48,6 +53,7 @@ export function DataTablePagination<TData>({
             <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
+            aria-label={t('table.lastPage')}
             variant="outline"
             size="icon"
             className="h-8 w-8"

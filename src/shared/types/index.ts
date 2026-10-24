@@ -1,3 +1,5 @@
+import type { AbilityPrioritySettings } from '../ability-priority'
+
 export interface Hero {
   heroId: number
   name: string
@@ -6,6 +8,8 @@ export interface Hero {
   highSkillWinrate: number | null
   pickRate: number | null
   hsPickRate: number | null
+  /** Windrun pickRate fraction; pickRate above is average pick position. */
+  draftFrequency?: number | null
   windrunId: number | null
 }
 
@@ -18,6 +22,8 @@ export interface AbilityDetail {
   highSkillWinrate: number | null
   pickRate: number | null
   hsPickRate: number | null
+  /** Windrun pickRate fraction; pickRate above is average pick position. */
+  draftFrequency?: number | null
   isUltimate: boolean
   abilityOrder: number
 }
@@ -72,6 +78,7 @@ export interface SystemDisplayInfo {
 }
 
 export interface AppSettings {
+  abilityPriority: AbilityPrioritySettings
   opThreshold: number
   trapThreshold: number
   language: string
@@ -168,6 +175,8 @@ export interface EnrichedScanSlot extends ScanResult {
   winrate: number | null
   pickRate: number | null
   consolidatedScore: number
+  /** ggxgg formula pick position; smaller is stronger, null means missing data. */
+  formulaPriority?: number | null
   isGeneralTopTier: boolean
   isSynergySuggestionForMySpot: boolean
   isUltimateFromDb: boolean
@@ -225,6 +234,8 @@ export interface EnrichedScanSlot extends ScanResult {
 }
 
 export interface OverlayDataPayload {
+  /** Formula evaluation or missing Windrun input message for the current scan. */
+  abilityPriorityError?: string
   initialSetup: boolean
   scanData: {
     ultimates: EnrichedScanSlot[]
@@ -319,6 +330,8 @@ export interface HeroModelDisplay {
   dbHeroId: number | null
   winrate: number | null
   pickRate: number | null
+  /** ggxgg formula pick position from the full population; null means missing data. */
+  formulaPriority?: number | null
   consolidatedScore: number
   isGeneralTopTier: boolean
   /** Linked-profile games on this hero (present only when personalization is active). */

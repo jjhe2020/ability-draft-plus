@@ -23,6 +23,8 @@ export interface AbilityUpsertData {
   winrate: number
   highSkillWinrate: number | null
   pickRate: number
+  /** Overall Windrun pick frequency (0..1); pickRate remains the average pick position. */
+  draftFrequency?: number | null
   hsPickRate: number | null
   isUltimate?: boolean
   /** Windrun/Valve ability id — join key for PlayerAbilityStats. */
@@ -110,6 +112,7 @@ function mapRow(row: typeof abilities.$inferSelect): AbilityDetail {
     winrate: row.winrate,
     highSkillWinrate: row.highSkillWinrate,
     pickRate: row.pickRate,
+    draftFrequency: row.draftFrequency,
     hsPickRate: row.hsPickRate,
     isUltimate: row.isUltimate ?? false,
     abilityOrder: row.abilityOrder ?? 0,
@@ -131,11 +134,7 @@ export function createAbilityRepository(db: SQLJsDatabase): AbilityRepository {
       const detailsMap = new Map<string, AbilityDetail>()
       if (names.length === 0) return detailsMap
 
-      const rows = db
-        .select()
-        .from(abilities)
-        .where(inArray(abilities.name, names))
-        .all()
+      const rows = db.select().from(abilities).where(inArray(abilities.name, names)).all()
 
       for (const row of rows) {
         detailsMap.set(row.name, mapRow(row))
@@ -164,6 +163,7 @@ export function createAbilityRepository(db: SQLJsDatabase): AbilityRepository {
             winrate: ability.winrate,
             highSkillWinrate: ability.highSkillWinrate,
             pickRate: ability.pickRate,
+            draftFrequency: ability.draftFrequency ?? null,
             hsPickRate: ability.hsPickRate,
             isUltimate: ability.isUltimate ?? false,
             windrunId: ability.windrunId ?? null,
@@ -176,6 +176,7 @@ export function createAbilityRepository(db: SQLJsDatabase): AbilityRepository {
               winrate: sql`excluded.winrate`,
               highSkillWinrate: sql`excluded.high_skill_winrate`,
               pickRate: sql`excluded.pick_rate`,
+              draftFrequency: sql`excluded.draft_frequency`,
               hsPickRate: sql`excluded.hs_pick_rate`,
               isUltimate: sql`excluded.is_ultimate`,
               windrunId: sql`excluded.windrun_id`,
@@ -227,7 +228,12 @@ export function createAbilityRepository(db: SQLJsDatabase): AbilityRepository {
         db
           .select({ name: abilities.name })
           .from(abilities)
-          .where(inArray(abilities.name, entries.map((e) => e.name)))
+          .where(
+            inArray(
+              abilities.name,
+              entries.map((e) => e.name),
+            ),
+          )
           .all()
           .map((row) => row.name),
       )
@@ -248,7 +254,12 @@ export function createAbilityRepository(db: SQLJsDatabase): AbilityRepository {
         db
           .select({ windrunId: abilities.windrunId })
           .from(abilities)
-          .where(inArray(abilities.windrunId, shifts.map((s) => s.windrunId)))
+          .where(
+            inArray(
+              abilities.windrunId,
+              shifts.map((s) => s.windrunId),
+            ),
+          )
           .all()
           .map((row) => row.windrunId),
       )

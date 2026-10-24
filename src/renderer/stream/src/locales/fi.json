@@ -11,14 +11,16 @@
   "pool": {
     "ultimates": "Ultimaatit",
     "standard": "Tavalliset kyvyt",
-    "modelPicked": "Draftattu"
+    "modelPicked": "Draftattu",
+    "aria": "Ability pool"
   },
   "panels": {
     "topWinrate": "Paras voittoprosentti",
     "opCombos": "Vahvimmat combot",
     "trapCombos": "Ansacombot",
     "topTier": "Huippupickit",
-    "latestPicks": "Viimeisimmät pickit"
+    "latestPicks": "Viimeisimmät pickit",
+    "aria": "Draft statistics"
   },
   "avgPick": "Pickataan yleensä noin #{{n}}",
   "player": "Pelaaja {{num}}",
@@ -35,7 +37,8 @@
     "confidence": {
       "low": "matala",
       "medium": "kesk.",
-      "high": "korkea"
+      "high": "korkea",
+      "none": "No data"
     }
   },
   "edit": {

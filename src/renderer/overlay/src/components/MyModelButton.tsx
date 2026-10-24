@@ -17,7 +17,7 @@ export function MyModelButton({
   isSelected,
   anySelected,
 }: MyModelButtonProps): React.ReactElement | null {
-  const { t } = useTranslation()
+  const { t } = useTranslation('overlay')
   const { onMouseEnter, onMouseLeave } = useMousePassthrough()
 
   // Hide if another model is selected (not this one)
@@ -37,9 +37,7 @@ export function MyModelButton({
   const style: React.CSSProperties = {
     top: boxY + boxHeight / 2,
     transform: `translateY(-50%)${isLeftSide ? ' translateX(-100%)' : ''}`,
-    left: isLeftSide
-      ? boxX - MY_MODEL_MARGIN
-      : boxX + boxWidth + MY_MODEL_MARGIN,
+    left: isLeftSide ? boxX - MY_MODEL_MARGIN : boxX + boxWidth + MY_MODEL_MARGIN,
   }
 
   const handleClick = (): void => {

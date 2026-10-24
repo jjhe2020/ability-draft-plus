@@ -35,11 +35,8 @@ import type { ScanTriggerService } from '../services/scan-trigger-service'
 import type { SlotMappingService } from '../services/slot-mapping-service'
 import type { AutoRescanService } from '../services/auto-rescan-service'
 import { startDevControlServer } from '../services/dev-control-service'
-import {
-  initialOverlayLifecycleState,
-  nextOverlayLifecycle,
-} from '@core/gsi/overlay-lifecycle'
-import type { LayoutSource } from '@shared/types'
+import { initialOverlayLifecycleState, nextOverlayLifecycle } from '@core/gsi/overlay-lifecycle'
+import type { LayoutSource } from '@shared/ipc/api'
 
 // @DEV-GUIDE: Central IPC handler registration. All renderer↔main communication goes through
 // typed IPC channels following the domain:action naming convention (e.g. 'ml:scan', 'hero:getAll').
@@ -69,7 +66,7 @@ export function registerIpcHandlers(
   layoutService: LayoutService,
   screenshotService: ScreenshotService,
   draftStore: StoreApi<DraftStore>,
-  scanProcessingService: ScanProcessingService,
+  _scanProcessingService: ScanProcessingService,
   appStore: AppStore,
   bridge: ZustandBridge,
   updateService: UpdateService,
@@ -167,14 +164,16 @@ export function registerIpcHandlers(
 
     if (!coords) {
       logger.warn('No layout coordinates for auto-detected resolution', { resolution, source })
-      return { success: false, error: `Unsupported resolution: ${resolution}. No layout coordinates available.` }
+      return {
+        success: false,
+        error: `Unsupported resolution: ${resolution}. No layout coordinates available.`,
+      }
     }
 
     // Background mode: the session runs with the overlay never shown. Everything
     // downstream (capture agent, hotkeys, scans, stream server, Twitch publisher)
     // is unchanged — only visibility differs.
-    const backgroundMode =
-      dbService.metadata.getSettings().overlayBackgroundMode === true
+    const backgroundMode = dbService.metadata.getSettings().overlayBackgroundMode === true
 
     const controlPanel = windowManager.getControlPanelWindow()
     if (controlPanel && !controlPanel.isDestroyed() && !backgroundMode) {
@@ -221,6 +220,7 @@ export function registerIpcHandlers(
     const scaleFactor = layoutService.getScaleFactor()
     pendingOverlayData = {
       initialSetup: true,
+      autoDraftTrackingEnabled: dbService.metadata.getSettings().experimentalAutoDraftTracking,
       scanData: null,
       targetResolution: resolution,
       scaleFactor,
@@ -242,10 +242,10 @@ export function registerIpcHandlers(
     const displayBounds = primaryDisplay.bounds
 
     windowTracker.startTracking((trackBounds) => {
-      if (trackBounds && (
-        trackBounds.width < displayBounds.width ||
-        trackBounds.height < displayBounds.height
-      )) {
+      if (
+        trackBounds &&
+        (trackBounds.width < displayBounds.width || trackBounds.height < displayBounds.height)
+      ) {
         // Game window is smaller than display → windowed mode
         windowManager.repositionOverlay(trackBounds)
       } else {
@@ -372,12 +372,9 @@ export function registerIpcHandlers(
     autoRescan.resetSession()
   })
 
-  ipcMain.on(
-    'overlay:setMouseIgnore',
-    (_event, data: { ignore: boolean; forward?: boolean }) => {
-      windowManager.setOverlayMouseEvents(data.ignore, data.forward ?? true)
-    },
-  )
+  ipcMain.on('overlay:setMouseIgnore', (_event, data: { ignore: boolean; forward?: boolean }) => {
+    windowManager.setOverlayMouseEvents(data.ignore, data.forward ?? true)
+  })
 
   // Database domain (hero, ability, settings, backup)
   registerDatabaseHandlers(dbService, backupService)
@@ -408,7 +405,13 @@ export function registerIpcHandlers(
   registerTwitchHandlers(twitchPublisher)
 
   // Resolution domain
-  registerResolutionHandlers(layoutService, screenshotService, windowTracker, windowManager, apiConfig)
+  registerResolutionHandlers(
+    layoutService,
+    screenshotService,
+    windowTracker,
+    windowManager,
+    apiConfig,
+  )
 
   // Dev-only ML pipeline cockpit (gather/upload/retrain shortcuts)
   if (!app.isPackaged) {

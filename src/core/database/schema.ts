@@ -22,6 +22,8 @@ export const heroes = sqliteTable('Heroes', {
   winrate: real('winrate'),
   highSkillWinrate: real('high_skill_winrate'),
   pickRate: real('pick_rate'),
+  // Overall Windrun pick frequency (0..1), distinct from pick_rate's average position.
+  draftFrequency: real('draft_frequency'),
   hsPickRate: real('hs_pick_rate'),
   windrunId: integer('windrun_id'),
   // /ability-shifts role fingerprint for the hero MODEL (negative-id entries;
@@ -49,6 +51,7 @@ export const abilities = sqliteTable(
     winrate: real('winrate'),
     highSkillWinrate: real('high_skill_winrate'),
     pickRate: real('pick_rate'),
+    draftFrequency: real('draft_frequency'),
     hsPickRate: real('hs_pick_rate'),
     isUltimate: integer('is_ultimate', { mode: 'boolean' }),
     abilityOrder: integer('ability_order'),
@@ -206,6 +209,7 @@ export const SCHEMA_SQL = `
     winrate REAL,
     high_skill_winrate REAL,
     pick_rate REAL,
+    draft_frequency REAL,
     hs_pick_rate REAL,
     windrun_id INTEGER,
     kills_shift REAL,
@@ -225,6 +229,7 @@ export const SCHEMA_SQL = `
     winrate REAL,
     high_skill_winrate REAL,
     pick_rate REAL,
+    draft_frequency REAL,
     hs_pick_rate REAL,
     is_ultimate INTEGER,
     ability_order INTEGER,

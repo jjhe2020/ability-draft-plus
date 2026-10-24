@@ -46,11 +46,12 @@
       "hero": "英雄",
       "winrate": "胜率",
       "hsWinrate": "高分段胜率",
-      "pickRate": "选取率",
+      "pickRate": "平均选位",
       "ultimate": "终极技能"
     },
     "filterPlaceholder": "筛选技能...",
-    "noResults": "未找到技能。"
+    "noResults": "未找到技能。",
+    "unknownHero": "未知英雄（{{id}}）"
   },
   "heroes": {
     "title": "英雄",
@@ -58,8 +59,8 @@
       "name": "英雄",
       "winrate": "胜率",
       "hsWinrate": "高分段胜率",
-      "pickRate": "选取率",
-      "hsPickRate": "高分段选取率"
+      "pickRate": "平均选位",
+      "hsPickRate": "高分段平均选位"
     },
     "filterPlaceholder": "筛选英雄...",
     "noResults": "未找到英雄。"
@@ -77,7 +78,33 @@
       "updateButton": "从 Liquipedia 补充数据",
       "running": "正在补充...",
       "warning": "由于 Liquipedia 的频率限制，处理全部英雄约需 67 分钟。",
-      "lastUpdated": "上次补充："
+      "lastUpdated": "上次补充：",
+      "progress": {
+        "start": "正在开始补充 Liquipedia 数据…",
+        "fetch": "正在获取英雄技能槽位信息…",
+        "apply": "正在应用 {{count}} 条 Liquipedia 数据…",
+        "applied": "已应用 {{count}} / {{total}} 条 Liquipedia 数据。",
+        "done": "Liquipedia 数据补充完成。",
+        "failed": "Liquipedia 数据补充失败，请检查网络后重试。",
+        "noHeroes": "数据库中暂无英雄，请先更新 Windrun 数据。"
+      }
+    },
+    "progress": {
+      "start": "正在开始更新 Windrun 数据…",
+      "fetchStatic": "正在获取 Windrun 技能和英雄信息…",
+      "fetchStats": "正在获取技能统计数据…",
+      "transform": "正在处理 Windrun 统计数据…",
+      "upsert": "正在更新 {{heroes}} 个英雄和 {{abilities}} 个技能…",
+      "prune": "已清理 {{count}} 个过时技能。",
+      "shifts": "已更新 {{abilities}} 个技能和 {{heroes}} 个英雄的位置数据。",
+      "shiftsUnavailable": "暂时无法获取位置数据，已保留原有数据。",
+      "fetchCombos": "正在获取双技能和三技能组合…",
+      "transformCombos": "正在处理组合统计数据…",
+      "insertCombos": "正在保存组合统计数据…",
+      "slotOverrides": "已应用 {{count}} 个技能槽位修正。",
+      "done": "Windrun 数据更新成功。",
+      "failed": "Windrun 数据更新失败，请检查网络后重试。",
+      "details": "技术详情"
     }
   },
   "mapper": {
@@ -91,7 +118,8 @@
       "capturing": "正在截取...",
       "retake": "重新截取",
       "next": "下一步",
-      "uploadButton": "上传图片"
+      "uploadButton": "上传图片",
+      "preview": "屏幕截图预览"
     },
     "autoDetect": {
       "title": "自动检测",
@@ -108,7 +136,8 @@
       "calibrate": "校准（点击 4 次）",
       "done": "布局已就绪，无需校准。",
       "submitScreenshot": "提交屏幕截图",
-      "noLayoutHelp": "此分辨率没有可用布局。请提交屏幕截图，我们会添加支持。"
+      "noLayoutHelp": "此分辨率没有可用布局。请提交屏幕截图，我们会添加支持。",
+      "detecting": "正在检测分辨率…"
     },
     "report": {
       "button": "报告映射失败",
@@ -156,5 +185,14 @@
       "zoomTip": "滚轮缩放，Ctrl+拖动平移"
     }
   },
-  "noResults": "没有结果。"
+  "noResults": "没有结果。",
+  "table": {
+    "rows": "共 {{count}} 条",
+    "page": "第 {{current}} / {{total}} 页",
+    "firstPage": "首页",
+    "previousPage": "上一页",
+    "nextPage": "下一页",
+    "lastPage": "末页",
+    "filter": "筛选…"
+  }
 }

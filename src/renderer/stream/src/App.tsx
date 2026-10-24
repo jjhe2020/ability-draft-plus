@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { apiBase, isDemoMode, useStreamState } from './hooks/use-stream-state'
@@ -9,6 +9,7 @@ import { StatPanels } from './components/StatPanels'
 import { PickTicker } from './components/PickTicker'
 import { EditMode, applyLayout, loadStoredLayout } from './components/EditMode'
 import i18n from './i18n'
+import { localizeDotaDisplay } from '@shared/localization/dota-names'
 
 // @DEV-GUIDE: Root of the stream SPA (OBS browser source) — a tournament-style
 // caster view that mirrors the in-game AD draft screen: team columns flanking the
@@ -62,8 +63,12 @@ function ArtLayer({ name }: { name: string }) {
 }
 
 function App(): React.ReactElement {
-  const { t } = useTranslation()
-  const { board, connection } = useStreamState()
+  const { t } = useTranslation('stream')
+  const { board: rawBoard, connection } = useStreamState()
+  const board = useMemo(
+    () => localizeDotaDisplay(rawBoard, rawBoard?.meta.language ?? 'zh-CN'),
+    [rawBoard],
+  )
   const demo = isDemoMode()
   const edit = param('edit') === '1'
 
@@ -100,23 +105,12 @@ function App(): React.ReactElement {
   return (
     <div className={`board bg-${bgMode()}`}>
       <ArtLayer name="board-bg" />
-      <TopBar
-        title={param('title')}
-        gsi={board.gsi}
-        connection={connection}
-        demo={demo}
-      />
+      <TopBar title={param('title')} gsi={board.gsi} connection={connection} demo={demo} />
 
       <main className="board-main">
-        <PlayerColumn
-          team="radiant"
-          players={board.players.filter((p) => p.team === 'radiant')}
-        />
+        <PlayerColumn team="radiant" players={board.players.filter((p) => p.team === 'radiant')} />
         <PoolBoard heroes={board.heroes} />
-        <PlayerColumn
-          team="dire"
-          players={board.players.filter((p) => p.team === 'dire')}
-        />
+        <PlayerColumn team="dire" players={board.players.filter((p) => p.team === 'dire')} />
       </main>
 
       <PickTicker board={board} />

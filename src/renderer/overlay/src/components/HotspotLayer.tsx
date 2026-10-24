@@ -3,6 +3,13 @@ import type { EnrichedScanSlot, HeroModelDisplay, OverlayDataPayload } from '@sh
 import { AbilityHotspot } from './AbilityHotspot'
 import { HeroModelHotspot } from './HeroModelHotspot'
 import { Tooltip, type TooltipData } from './Tooltip'
+import {
+  modelPriorityRows,
+  poolPriorityColor,
+  standardPriorityRows,
+  summarizePoolPriorities,
+  ultimatePriorityRows,
+} from '../pool-priority'
 
 interface HotspotLayerProps {
   overlayData: OverlayDataPayload
@@ -18,21 +25,15 @@ export function HotspotLayer({
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null)
   const [tooltipAnchor, setTooltipAnchor] = useState<DOMRect | null>(null)
 
-  const handleAbilityHover = useCallback(
-    (slot: EnrichedScanSlot, rect: DOMRect) => {
-      setTooltipData({ type: 'ability', slot })
-      setTooltipAnchor(rect)
-    },
-    [],
-  )
+  const handleAbilityHover = useCallback((slot: EnrichedScanSlot, rect: DOMRect) => {
+    setTooltipData({ type: 'ability', slot })
+    setTooltipAnchor(rect)
+  }, [])
 
-  const handleHeroHover = useCallback(
-    (model: HeroModelDisplay, rect: DOMRect) => {
-      setTooltipData({ type: 'hero', model })
-      setTooltipAnchor(rect)
-    },
-    [],
-  )
+  const handleHeroHover = useCallback((model: HeroModelDisplay, rect: DOMRect) => {
+    setTooltipData({ type: 'hero', model })
+    setTooltipAnchor(rect)
+  }, [])
 
   const handleLeave = useCallback(() => {
     setTooltipData(null)
@@ -42,6 +43,15 @@ export function HotspotLayer({
   if (!overlayData.scanData) return null
 
   const { scanData, scaleFactor, heroModels, modelsCoords } = overlayData
+  // Use the tables' full-match distributions so a drafted entry does not
+  // shift the color of every remaining number. Normal abilities form a third group.
+  const ultimateSummary = summarizePoolPriorities(
+    ultimatePriorityRows(scanData, '', modelsCoords.length),
+  )
+  const standardSummary = summarizePoolPriorities(
+    standardPriorityRows(scanData, '', modelsCoords.length * 3),
+  )
+  const modelSummary = summarizePoolPriorities(modelPriorityRows(heroModels))
 
   return (
     <>
@@ -51,6 +61,7 @@ export function HotspotLayer({
           key={`ult-${i}`}
           slot={slot}
           scaleFactor={scaleFactor}
+          priorityColor={poolPriorityColor(slot.formulaPriority ?? null, ultimateSummary)}
           isSelectedAbility={false}
           isMySpotHero={false}
           onHover={handleAbilityHover}
@@ -64,6 +75,7 @@ export function HotspotLayer({
           key={`std-${i}`}
           slot={slot}
           scaleFactor={scaleFactor}
+          priorityColor={poolPriorityColor(slot.formulaPriority ?? null, standardSummary)}
           isSelectedAbility={false}
           isMySpotHero={false}
           onHover={handleAbilityHover}
@@ -94,6 +106,7 @@ export function HotspotLayer({
             model={model}
             coord={coord}
             scaleFactor={scaleFactor}
+            priorityColor={poolPriorityColor(model.formulaPriority ?? null, modelSummary)}
             isMyModel={model.heroOrder === selectedModelHeroOrder}
             onHover={handleHeroHover}
             onLeave={handleLeave}

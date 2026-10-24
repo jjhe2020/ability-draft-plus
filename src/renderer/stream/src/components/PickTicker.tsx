@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
+import { localizeAbilityName } from '@shared/localization/dota-names'
 import type { StreamBoardState } from '@shared/types/stream'
 import { apiBase } from '../hooks/use-stream-state'
 
@@ -15,7 +17,7 @@ interface TickerEntry {
   displayName: string
 }
 
-function resolveEntries(board: StreamBoardState, t: (k: string, o?: object) => string): TickerEntry[] {
+function resolveEntries(board: StreamBoardState, t: TFunction<'stream'>): TickerEntry[] {
   const feed = board.pickFeed ?? []
   const displayByName = new Map<string, string>()
   for (const hero of board.heroes) {
@@ -36,15 +38,16 @@ function resolveEntries(board: StreamBoardState, t: (k: string, o?: object) => s
     .map((e) => ({
       key: e.seq,
       playerName:
-        board.players[e.playerIndex]?.playerName ??
-        t('player', { num: e.playerIndex + 1 }),
+        board.players[e.playerIndex]?.playerName ?? t('player', { num: e.playerIndex + 1 }),
       abilityName: e.abilityName as string,
-      displayName: displayByName.get(e.abilityName as string) ?? (e.abilityName as string),
+      displayName:
+        displayByName.get(e.abilityName as string) ??
+        localizeAbilityName(e.abilityName, e.abilityName as string, board.meta.language),
     }))
 }
 
 export function PickTicker({ board }: { board: StreamBoardState }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('stream')
   const entries = resolveEntries(board, t)
   if (entries.length === 0) return null
 

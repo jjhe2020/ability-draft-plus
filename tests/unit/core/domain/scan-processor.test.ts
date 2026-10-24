@@ -5,6 +5,8 @@ import type { ScanResult, AbilityDetail, SlotCoordinate } from '@shared/types'
 import type { InitialScanResults } from '@shared/types/ml'
 import type { DraftSessionState, ScanProcessorDeps } from '@core/domain/types'
 import { AGHS_STACK_BOOST, POINT_SINK_DAMP } from '@shared/constants/thresholds'
+import { DEFAULT_SETTINGS } from '@shared/constants/defaults'
+import { DEFAULT_ABILITY_PRIORITY, calculateAbilityPriorities } from '@shared/ability-priority'
 import type {
   SynergyPartner,
   AbilitySynergyPair,
@@ -209,6 +211,138 @@ function makeInitialScanInput(): ScanProcessorInput {
     scaleFactor: 1.0,
   }
 }
+
+describe('custom ability priority scan integration', () => {
+  function customInput(formula = DEFAULT_ABILITY_PRIORITY.formula): ScanProcessorInput {
+    const input = makeInitialScanInput()
+    const all = Array.from({ length: 12 }, (_, i): AbilityDetail => ({
+      ...abilityDb.fireball, abilityId: i + 1, name: `custom_${i}`,
+      winrate: 0.40 + i * 0.01, pickRate: 2 + i * 3, draftFrequency: 0.8 + i * 0.01,
+    }))
+    const config = { ...DEFAULT_ABILITY_PRIORITY, formula }
+    input.rawResults = {
+      ultimates: [], standard: all.map((row, i) => makeScanResult(row.name, i % 10, 0, false)),
+      selectedAbilities: [], heroDefiningAbilities: [],
+    }
+    input.deps = {
+      ...mockDeps,
+      abilities: {
+        ...mockDeps.abilities,
+        getAll: () => all,
+        getDetails: (names) => new Map(all.filter((row) => names.includes(row.name)).map((row) => [row.name, row])),
+      },
+      settings: {
+        getSettings: () => ({ ...DEFAULT_SETTINGS, abilityPriority: config }),
+        // Includes an off-screen hero, exactly as the persisted /abilities snapshot does.
+        getPriorityPopulation: () => [...all, { name: 'hero:outside', winrate: 0.60, pickRate: 20, draftFrequency: 0.9 }],
+      },
+    }
+    return input
+  }
+
+  it('uses the full snapshot including off-screen heroes, and preserves raw formula outputs', () => {
+    const input = customInput()
+    const config = input.deps.settings.getSettings().abilityPriority
+    const expected = calculateAbilityPriorities(input.deps.settings.getPriorityPopulation!()!, config).priorities
+    const slots = processScanResults(input).overlayPayload.scanData!.standard
+    for (const slot of slots) {
+      expect(slot.formulaPriority).toBeCloseTo(expected.get(slot.name!)!, 10)
+    }
+    // Rescanning a smaller captured pool must not change a remaining skill's priority.
+    input.rawResults.standard = input.rawResults.standard.slice(0, 2)
+    const smaller = processScanResults(input).overlayPayload.scanData!.standard
+    expect(smaller[0].formulaPriority).toBeCloseTo(slots[0].formulaPriority!, 10)
+  })
+
+  it('reverses the general top-ten suggestions when the edited formula reverses strength', () => {
+    const early = processScanResults(customInput('avgPick')).overlayPayload.scanData!.standard
+    const late = processScanResults(customInput('-avgPick')).overlayPayload.scanData!.standard
+    expect(early.filter((slot) => slot.isGeneralTopTier).map((slot) => slot.name)).toEqual(
+      Array.from({ length: 10 }, (_, i) => `custom_${i}`),
+    )
+    expect(late.filter((slot) => slot.isGeneralTopTier).map((slot) => slot.name)).toEqual(
+      Array.from({ length: 10 }, (_, i) => `custom_${i + 2}`),
+    )
+  })
+
+  it('suppresses missing-data suggestions and reports a readable refresh message', () => {
+    const input = customInput()
+    input.deps.settings.getPriorityPopulation = () => []
+    const payload = processScanResults(input).overlayPayload
+    expect(payload.abilityPriorityError).toContain('Windrun')
+    expect(payload.scanData!.standard.every((slot) => slot.formulaPriority === null && !slot.isGeneralTopTier)).toBe(true)
+  })
+
+  it('surfaces an invalid runtime formula without reverting to the old score', () => {
+    const payload = processScanResults(customInput('avgPick / 0')).overlayPayload
+    expect(payload.abilityPriorityError).toContain('非有限值')
+    expect(payload.scanData!.standard.every((slot) => slot.consolidatedScore === 0 && !slot.isGeneralTopTier)).toBe(true)
+  })
+
+  function modelInput(): ScanProcessorInput {
+    const input = makeInitialScanInput()
+    input.deps = {
+      ...mockDeps,
+      settings: {
+        getSettings: () => ({ ...DEFAULT_SETTINGS }),
+        getPriorityPopulation: () => [
+          ...Object.values(abilityDb).map((row) => ({ ...row, draftFrequency: 0.8 })),
+          { name: 'hero:lina', winrate: 0.52, pickRate: 15, draftFrequency: 0.9 },
+          { name: 'hero:antimage', winrate: 0.48, pickRate: 20, draftFrequency: 0.85 },
+          { name: 'hero:outside', winrate: 0.7, pickRate: 1, draftFrequency: 0.95 },
+        ],
+      },
+    }
+    return input
+  }
+
+  it('exposes model formula positions from the full population without changing model scoring', () => {
+    const input = modelInput()
+    const config = input.deps.settings.getSettings().abilityPriority
+    const expected = calculateAbilityPriorities(input.deps.settings.getPriorityPopulation!()!, config).priorities
+    const models = processScanResults(input).overlayPayload.heroModels
+    input.deps.settings.getSettings = () => ({
+      ...DEFAULT_SETTINGS, abilityPriority: { ...config, mode: 'standard' },
+    })
+    const standardModels = processScanResults(input).overlayPayload.heroModels
+
+    expect(models).toHaveLength(2)
+    for (const [index, model] of models.entries()) {
+      expect(model.formulaPriority).toBeCloseTo(expected.get(`hero:${model.heroName}`)!, 10)
+      expect(model.consolidatedScore).toBe(standardModels[index].consolidatedScore)
+      expect(model.isGeneralTopTier).toBe(standardModels[index].isGeneralTopTier)
+      expect(standardModels[index].formulaPriority).toBeUndefined()
+    }
+  })
+
+  it('keeps a missing model formula input null while preserving available models', () => {
+    const input = modelInput()
+    const population = input.deps.settings.getPriorityPopulation!()!
+    input.deps.settings.getPriorityPopulation = () => population.map((row) =>
+      row.name === 'hero:lina' ? { ...row, draftFrequency: null } : row,
+    )
+    const models = processScanResults(input).overlayPayload.heroModels
+    expect(models.find((model) => model.heroName === 'lina')?.formulaPriority).toBeNull()
+    expect(models.find((model) => model.heroName === 'antimage')?.formulaPriority).toEqual(expect.any(Number))
+  })
+
+  it('retains a picked model formula position after it leaves the recommendation candidates', () => {
+    const input = modelInput()
+    const initial = processScanResults(input)
+    const model = initial.overlayPayload.heroModels.find((item) => item.heroOrder === 0)!
+    const rescan = processScanResults({
+      ...input,
+      rawResults: [makeScanResult('fireball', 0, 1, false)],
+      isInitialScan: false,
+      state: { ...initial.updatedState, pickedModelHeroOrders: [0] },
+    })
+    const picked = rescan.overlayPayload.heroModels.find((item) => item.heroOrder === 0)!
+    expect(picked.isPicked).toBe(true)
+    expect(picked.isGeneralTopTier).toBe(false)
+    expect(picked.formulaPriority).toBe(model.formulaPriority)
+    expect(picked.consolidatedScore).toBe(model.consolidatedScore)
+  })
+})
 
 // ---------------------------------------------------------------------------
 // Tests

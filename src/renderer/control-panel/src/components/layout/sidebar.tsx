@@ -23,11 +23,12 @@ import { useAppDispatch } from '@/hooks/use-dispatch'
 import { APP_ACTIONS } from '@shared/types/app-store'
 import { SUPPORT_URL, SUPPORT_DATDOTA_URL } from '@shared/constants/defaults'
 import type { PageId } from '@/hooks/use-navigation'
+import type { ParseKeys } from 'i18next'
 
 const navItems: Array<{
   id: PageId
   icon: React.ComponentType<{ className?: string }>
-  labelKey: string
+  labelKey: ParseKeys<'common'>
   devOnly?: boolean
 }> = [
   { id: 'dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },

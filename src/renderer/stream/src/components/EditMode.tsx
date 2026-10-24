@@ -161,7 +161,7 @@ export function applyLayout(layout: EditLayout): void {
 const round1 = (n: number) => Math.round(n * 10) / 10
 
 export function EditMode() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('stream')
   const [layout, setLayout] = useState<EditLayout>(loadStoredLayout)
   const [hovered, setHovered] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -214,8 +214,7 @@ export function EditMode() {
       e.preventDefault()
       const base = layoutRef.current[group.key] ?? IDENTITY
       const onRightSide =
-        group.right !== undefined &&
-        (e.target as HTMLElement).closest(group.right) !== null
+        group.right !== undefined && (e.target as HTMLElement).closest(group.right) !== null
       drag = {
         key: group.key,
         xFactor: onRightSide ? -1 : 1,
@@ -315,8 +314,7 @@ export function EditMode() {
     const rect = panel.getBoundingClientRect()
     const offX = e.clientX - rect.left
     const offY = e.clientY - rect.top
-    const onMove = (ev: PointerEvent) =>
-      setPanelPos({ x: ev.clientX - offX, y: ev.clientY - offY })
+    const onMove = (ev: PointerEvent) => setPanelPos({ x: ev.clientX - offX, y: ev.clientY - offY })
     const onUp = () => {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)

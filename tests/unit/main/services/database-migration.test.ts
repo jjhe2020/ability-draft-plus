@@ -105,6 +105,25 @@ describe('runColumnMigrations', () => {
     db.close()
   })
 
+  it('adds draft frequency without treating historical pick position as frequency', () => {
+    const db = new SQL.Database()
+    db.run(V1_SCHEMA_SQL)
+    db.run(`INSERT INTO Heroes (name, pick_rate) VALUES ('antimage', 12.3)`)
+    db.run(`INSERT INTO Abilities (name, hero_id, pick_rate) VALUES ('mana_break', 1, 6.7)`)
+
+    runColumnMigrations(db)
+    runColumnMigrations(db)
+
+    for (const table of ['Heroes', 'Abilities']) {
+      expect(getColumns(db, table)).toContain('draft_frequency')
+      const rows = db.exec(`SELECT pick_rate, draft_frequency FROM ${table}`)
+      expect(rows[0].values[0][1]).toBeNull()
+    }
+    expect(db.exec('SELECT pick_rate FROM Heroes')[0].values[0][0]).toBe(12.3)
+    expect(db.exec('SELECT pick_rate FROM Abilities')[0].values[0][0]).toBe(6.7)
+    db.close()
+  })
+
   it('adds the ability shift columns (2.6 role fingerprint) to a pre-shift DB', () => {
     const db = new SQL.Database()
     db.run(V1_SCHEMA_SQL)

@@ -50,7 +50,8 @@
       "ultimate": "Ultimate"
     },
     "filterPlaceholder": "Filtrar habilidades...",
-    "noResults": "Nenhuma habilidade encontrada."
+    "noResults": "Nenhuma habilidade encontrada.",
+    "unknownHero": "Unknown hero ({{id}})"
   },
   "heroes": {
     "title": "Heróis",
@@ -77,7 +78,33 @@
       "updateButton": "Enriquecer pela Liquipedia",
       "running": "Enriquecendo...",
       "warning": "Isso leva ~67 minutos para todos os heróis por causa dos limites de requisição da Liquipedia.",
-      "lastUpdated": "Último enriquecimento:"
+      "lastUpdated": "Último enriquecimento:",
+      "progress": {
+        "start": "Starting Liquipedia enrichment…",
+        "fetch": "Fetching hero ability slot metadata…",
+        "apply": "Applying {{count}} Liquipedia updates…",
+        "applied": "Applied {{count}} / {{total}} Liquipedia updates.",
+        "done": "Liquipedia enrichment complete.",
+        "failed": "Liquipedia enrichment failed. Check your connection and retry.",
+        "noHeroes": "No heroes in the database. Update Windrun data first."
+      }
+    },
+    "progress": {
+      "start": "Starting Windrun data update…",
+      "fetchStatic": "Fetching Windrun ability and hero metadata…",
+      "fetchStats": "Fetching ability statistics…",
+      "transform": "Processing Windrun statistics…",
+      "upsert": "Updating {{heroes}} heroes and {{abilities}} abilities…",
+      "prune": "Removed {{count}} obsolete abilities.",
+      "shifts": "Updated role data for {{abilities}} abilities and {{heroes}} heroes.",
+      "shiftsUnavailable": "Role data is unavailable. Previous values have been retained.",
+      "fetchCombos": "Fetching ability pairs and triplets…",
+      "transformCombos": "Processing combination statistics…",
+      "insertCombos": "Saving combination statistics…",
+      "slotOverrides": "Applied {{count}} ability slot corrections.",
+      "done": "Windrun data updated successfully.",
+      "failed": "Windrun data update failed. Check your connection and retry.",
+      "details": "Technical details"
     }
   },
   "mapper": {
@@ -91,7 +118,8 @@
       "capturing": "Capturando...",
       "retake": "Capturar de novo",
       "next": "Avançar",
-      "uploadButton": "Enviar imagem"
+      "uploadButton": "Enviar imagem",
+      "preview": "Screenshot preview"
     },
     "autoDetect": {
       "title": "Detecção automática",
@@ -108,7 +136,8 @@
       "calibrate": "Calibrar (4 cliques)",
       "done": "Layout pronto. Nenhuma calibração necessária.",
       "submitScreenshot": "Enviar screenshot",
-      "noLayoutHelp": "Nenhum layout disponível para esta resolução. Envie seu screenshot e adicionaremos o suporte."
+      "noLayoutHelp": "Nenhum layout disponível para esta resolução. Envie seu screenshot e adicionaremos o suporte.",
+      "detecting": "Detecting resolution…"
     },
     "report": {
       "button": "Reportar mapeamento com falha",
@@ -156,5 +185,14 @@
       "zoomTip": "Role para dar zoom, Ctrl+arrastar para mover"
     }
   },
-  "noResults": "Nenhum resultado."
+  "noResults": "Nenhum resultado.",
+  "table": {
+    "rows": "{{count}} rows",
+    "page": "Page {{current}} of {{total}}",
+    "firstPage": "First page",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "lastPage": "Last page",
+    "filter": "Filter…"
+  }
 }

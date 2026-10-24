@@ -3,6 +3,7 @@ import type { SQLJsDatabase } from 'drizzle-orm/sql-js'
 import { metadata } from '../schema'
 import type { AppSettings } from '@shared/types'
 import { DEFAULT_SETTINGS } from '@shared/constants/defaults'
+import { validateAbilityPrioritySettings, type PriorityRow } from '@shared/ability-priority'
 
 // @DEV-GUIDE: Key-value store backed by the Metadata table. Used for:
 // - App settings (OP threshold, trap threshold, language) — getSettings/setSettings
@@ -14,6 +15,7 @@ export interface MetadataRepository {
   get(key: string): string | null
   set(key: string, value: string): void
   getSettings(): AppSettings
+  getPriorityPopulation(): PriorityRow[] | null
   setSettings(settings: Partial<AppSettings>): void
   getLastScrapeDate(): string | null
   setLastScrapeDate(date: string): void
@@ -36,7 +38,40 @@ export function createMetadataRepository(db: SQLJsDatabase): MetadataRepository 
     get,
     set,
 
+    getPriorityPopulation(): PriorityRow[] | null {
+      const stored = get('windrun_priority_population')
+      if (!stored) return null
+      try {
+        const rows: unknown = JSON.parse(stored)
+        if (
+          !Array.isArray(rows) ||
+          !rows.every(
+            (row) =>
+              row &&
+              typeof row === 'object' &&
+              typeof row.name === 'string' &&
+              (row.winrate === null || typeof row.winrate === 'number') &&
+              (row.pickRate === null || typeof row.pickRate === 'number') &&
+              (row.draftFrequency === null || typeof row.draftFrequency === 'number'),
+          )
+        )
+          return null
+        return rows as PriorityRow[]
+      } catch {
+        return null
+      }
+    },
+
     getSettings(): AppSettings {
+      let abilityPriority = DEFAULT_SETTINGS.abilityPriority
+      const storedPriority = get('ability_priority')
+      if (storedPriority !== null) {
+        try {
+          abilityPriority = validateAbilityPrioritySettings(JSON.parse(storedPriority))
+        } catch {
+          /* Invalid legacy metadata falls back to the documented default. */
+        }
+      }
       const opThreshold = get('op_threshold')
       const trapThreshold = get('trap_threshold')
       const language = get('language')
@@ -55,35 +90,24 @@ export function createMetadataRepository(db: SQLJsDatabase): MetadataRepository 
       const overlayBackgroundMode = get('overlay_background_mode')
 
       return {
-        opThreshold:
-          opThreshold !== null
-            ? parseFloat(opThreshold)
-            : DEFAULT_SETTINGS.opThreshold,
+        abilityPriority,
+        opThreshold: opThreshold !== null ? parseFloat(opThreshold) : DEFAULT_SETTINGS.opThreshold,
         trapThreshold:
-          trapThreshold !== null
-            ? parseFloat(trapThreshold)
-            : DEFAULT_SETTINGS.trapThreshold,
+          trapThreshold !== null ? parseFloat(trapThreshold) : DEFAULT_SETTINGS.trapThreshold,
         language: language ?? DEFAULT_SETTINGS.language,
         themeMode:
           themeMode === 'light' || themeMode === 'dark' || themeMode === 'system'
             ? themeMode
             : DEFAULT_SETTINGS.themeMode,
         overlayOpacity:
-          overlayOpacity !== null
-            ? parseFloat(overlayOpacity)
-            : DEFAULT_SETTINGS.overlayOpacity,
+          overlayOpacity !== null ? parseFloat(overlayOpacity) : DEFAULT_SETTINGS.overlayOpacity,
         overlayAnchor:
           overlayAnchor === 'left' || overlayAnchor === 'right'
             ? overlayAnchor
             : DEFAULT_SETTINGS.overlayAnchor,
-        streamPort:
-          streamPort !== null
-            ? parseInt(streamPort, 10)
-            : DEFAULT_SETTINGS.streamPort,
+        streamPort: streamPort !== null ? parseInt(streamPort, 10) : DEFAULT_SETTINGS.streamPort,
         streamAutostart:
-          streamAutostart !== null
-            ? streamAutostart === 'true'
-            : DEFAULT_SETTINGS.streamAutostart,
+          streamAutostart !== null ? streamAutostart === 'true' : DEFAULT_SETTINGS.streamAutostart,
         experimentalAutoDraftTracking:
           autoDraftTracking !== null
             ? autoDraftTracking === 'true'
@@ -124,6 +148,14 @@ export function createMetadataRepository(db: SQLJsDatabase): MetadataRepository 
     },
 
     setSettings(settings: Partial<AppSettings>): void {
+      // Validate before any write so a rejected rule cannot partly update settings.
+      const abilityPriority =
+        settings.abilityPriority !== undefined
+          ? validateAbilityPrioritySettings(settings.abilityPriority)
+          : undefined
+      if (abilityPriority !== undefined) {
+        set('ability_priority', JSON.stringify(abilityPriority))
+      }
       if (settings.opThreshold !== undefined) {
         set('op_threshold', String(settings.opThreshold))
       }
@@ -149,10 +181,7 @@ export function createMetadataRepository(db: SQLJsDatabase): MetadataRepository 
         set('stream_autostart', String(settings.streamAutostart))
       }
       if (settings.experimentalAutoDraftTracking !== undefined) {
-        set(
-          'experimental_auto_draft_tracking',
-          String(settings.experimentalAutoDraftTracking),
-        )
+        set('experimental_auto_draft_tracking', String(settings.experimentalAutoDraftTracking))
       }
       if (settings.overlayAutoCloseEnabled !== undefined) {
         set('overlay_auto_close', String(settings.overlayAutoCloseEnabled))

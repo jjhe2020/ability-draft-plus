@@ -34,9 +34,9 @@ function ComboEntry({ combo }: { combo: StreamComboDisplay }) {
 }
 
 export function StatPanels({ panels }: { panels: StreamPanels }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('stream')
   return (
-    <aside className="panels" aria-label="Draft statistics">
+    <aside className="panels" aria-label={t('panels.aria')}>
       <div className="panel">
         <h2 className="panel-title">{t('panels.topWinrate')}</h2>
         <div className="panel-tiles">
@@ -44,7 +44,10 @@ export function StatPanels({ panels }: { panels: StreamPanels }) {
             <div className="top-winrate-entry" key={i}>
               <AbilityTile slot={slot} size="small" />
               {slot.pickPosition !== null && (
-                <span className="avg-pick" title={t('avgPick', { n: Math.round(slot.pickPosition) })}>
+                <span
+                  className="avg-pick"
+                  title={t('avgPick', { n: Math.round(slot.pickPosition) })}
+                >
                   #{Math.round(slot.pickPosition)}
                 </span>
               )}

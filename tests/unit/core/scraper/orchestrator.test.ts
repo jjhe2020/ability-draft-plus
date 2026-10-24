@@ -147,6 +147,31 @@ describe('performFullScrape', () => {
     expect(result.error).toBeUndefined()
   })
 
+  it('persists every Windrun population row including heroes and unmapped new entries', async () => {
+    const source = await deps.apiClient.fetchAbilities()
+    const stats = [
+      ...source.data.abilityStats,
+      { ...source.data.abilityStats[0], abilityId: 999999, pickRate: 0.2 },
+      { ...source.data.abilityStats[1], abilityId: -999999, pickRate: 0.4 },
+    ]
+    vi.mocked(deps.apiClient.fetchAbilities).mockResolvedValueOnce({
+      ...source, data: { ...source.data, abilityStats: stats },
+    })
+    await performFullScrape(deps, onProgress)
+    const call = vi.mocked(deps.metadata.set).mock.calls.find(([key]) => key === 'windrun_priority_population')
+    expect(call).toBeDefined()
+    expect(JSON.parse(call![1])).toEqual([
+      { name: 'ursa_fury_swipes', winrate: 0.55, pickRate: 2.6, draftFrequency: 0.99 },
+      { name: 'hero:ursa', winrate: 0.52, pickRate: 4.5, draftFrequency: 0.95 },
+      { name: 'windrun:999999', winrate: 0.55, pickRate: 2.6, draftFrequency: 0.2 },
+      { name: 'hero:-999999', winrate: 0.52, pickRate: 4.5, draftFrequency: 0.4 },
+    ])
+    expect(deps.abilities.upsertAbilities).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ pickRate: 2.6, draftFrequency: 0.99 })]),
+      expect.any(Map),
+    )
+  })
+
   it('reports progress through all phases', async () => {
     await performFullScrape(deps, onProgress)
 

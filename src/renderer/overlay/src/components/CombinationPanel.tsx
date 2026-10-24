@@ -12,7 +12,7 @@ interface CombinationPanelProps {
 
 function formatWr(wr: number): string {
   const n = typeof wr === 'number' ? wr : Number(wr)
-  if (Number.isNaN(n)) return 'N/A'
+  if (Number.isNaN(n)) return '—'
   return `${(n * 100).toFixed(1)}%`
 }
 
@@ -23,7 +23,7 @@ export function CombinationPanel({
   visible,
   onToggle,
 }: CombinationPanelProps): React.ReactElement | null {
-  const { t } = useTranslation()
+  const { t } = useTranslation('overlay')
   const { onMouseEnter, onMouseLeave } = useMousePassthrough()
 
   const hasContent = abilityCombinations.length > 0 || heroSynergies.length > 0
@@ -72,10 +72,10 @@ export function CombinationPanel({
         <div key={`a-${i}`} className="combination-panel-item">
           {itemPrefix}
           <span className={combo.inflatedSynergy ? 'combination-panel-inflated' : ''}>
-            {combo.inflatedSynergy ? '~' : ''}{combo.ability1DisplayName}
+            {combo.inflatedSynergy ? '~' : ''}
+            {combo.ability1DisplayName}
           </span>{' '}
-          + <span>{combo.ability2DisplayName}</span>{' '}
-          ({formatWr(combo.synergyWinrate)})
+          + <span>{combo.ability2DisplayName}</span> ({formatWr(combo.synergyWinrate)})
           {combo.suggestedThird && (
             <span
               className="combination-panel-third"
@@ -96,8 +96,8 @@ export function CombinationPanel({
       {heroSynergies.map((syn, i) => (
         <div key={`h-${i}`} className="combination-panel-item combination-panel-hero-synergy">
           {itemPrefix}
-          <span>{syn.heroDisplayName}</span> + <span>{syn.abilityDisplayName}</span>{' '}
-          ({formatWr(syn.synergyWinrate)})
+          <span>{syn.heroDisplayName}</span> + <span>{syn.abilityDisplayName}</span> (
+          {formatWr(syn.synergyWinrate)})
         </div>
       ))}
     </div>

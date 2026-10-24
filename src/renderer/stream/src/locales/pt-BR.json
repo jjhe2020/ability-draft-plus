@@ -11,14 +11,16 @@
   "pool": {
     "ultimates": "Habilidades ultimate",
     "standard": "Habilidades comuns",
-    "modelPicked": "Draftado"
+    "modelPicked": "Draftado",
+    "aria": "Ability pool"
   },
   "panels": {
     "topWinrate": "Maior taxa de vitória",
     "opCombos": "Combos mais fortes",
     "trapCombos": "Combos armadilha",
     "topTier": "Top Picks",
-    "latestPicks": "Últimos picks"
+    "latestPicks": "Últimos picks",
+    "aria": "Draft statistics"
   },
   "avgPick": "Normalmente escolhida por volta do nº {{n}}",
   "player": "Jogador {{num}}",
@@ -35,7 +37,8 @@
     "confidence": {
       "low": "baixa",
       "medium": "média",
-      "high": "alta"
+      "high": "alta",
+      "none": "No data"
     }
   },
   "edit": {

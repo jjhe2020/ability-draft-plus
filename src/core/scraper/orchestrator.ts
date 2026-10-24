@@ -64,7 +64,11 @@ export async function performFullScrape(
 ): Promise<ScraperResult> {
   try {
     // ── Phase 1: Abilities & Heroes ────────────────────────────────────────
-    onProgress({ phase: 'phase1', message: 'Fetching static data from Windrun...' })
+    onProgress({
+      phase: 'phase1',
+      message: 'Fetching static data from Windrun...',
+      messageKey: 'scraping.progress.fetchStatic',
+    })
 
     const [staticAbilitiesRes, staticHeroesRes] = await Promise.all([
       deps.apiClient.fetchStaticAbilities(),
@@ -75,7 +79,11 @@ export async function performFullScrape(
     const abilityLookup = buildAbilityLookup(staticAbilitiesRes.data)
     const staticHeroes = staticHeroesRes.data
 
-    onProgress({ phase: 'phase1', message: 'Fetching ability stats...' })
+    onProgress({
+      phase: 'phase1',
+      message: 'Fetching ability stats...',
+      messageKey: 'scraping.progress.fetchStats',
+    })
 
     const [abilitiesRes, hsRes] = await Promise.all([
       deps.apiClient.fetchAbilities(options.patch),
@@ -90,6 +98,7 @@ export async function performFullScrape(
     onProgress({
       phase: 'phase1',
       message: `Transforming... (stats: ${overallStats.length} total, ${positiveIds} abilities, ${negativeIds} heroes; lookup: ${abilityLookup.size} abilities, ${Object.keys(staticHeroes).length} heroes)`,
+      messageKey: 'scraping.progress.transform',
     })
 
     const { heroData, abilityData } = transformAbilitiesAndHeroes(
@@ -102,6 +111,8 @@ export async function performFullScrape(
     onProgress({
       phase: 'phase1',
       message: `Upserting ${heroData.length} heroes and ${abilityData.length} abilities...`,
+      messageKey: 'scraping.progress.upsert',
+      params: { heroes: heroData.length, abilities: abilityData.length },
     })
 
     const heroNameToIdMap = deps.heroes.upsertHeroes(heroData)
@@ -114,6 +125,7 @@ export async function performFullScrape(
         highSkillWinrate: a.highSkillWinrate,
         pickRate: a.pickRate,
         hsPickRate: a.hsPickRate,
+        draftFrequency: a.draftFrequency,
         isUltimate: a.isUltimate,
         windrunId: a.windrunId,
       })),
@@ -129,6 +141,8 @@ export async function performFullScrape(
       onProgress({
         phase: 'phase1',
         message: `Pruned ${prunedNames.length} stale abilities: ${prunedNames.join(', ')}`,
+        messageKey: 'scraping.progress.prune',
+        params: { count: prunedNames.length },
       })
     }
 
@@ -152,27 +166,50 @@ export async function performFullScrape(
         dmgShift: s.dmgShift,
         healingShift: s.healingShift,
       }))
-      const applied = deps.abilities.applyAbilityShifts(
-        entries.filter((e) => e.windrunId > 0),
-      )
+      const applied = deps.abilities.applyAbilityShifts(entries.filter((e) => e.windrunId > 0))
       const heroApplied = deps.heroes.applyHeroShifts(
-        entries
-          .filter((e) => e.windrunId < 0)
-          .map((e) => ({ ...e, windrunId: -e.windrunId })),
+        entries.filter((e) => e.windrunId < 0).map((e) => ({ ...e, windrunId: -e.windrunId })),
       )
       onProgress({
         phase: 'phase1',
         message: `Applied ability shifts to ${applied} abilities and ${heroApplied} hero models`,
+        messageKey: 'scraping.progress.shifts',
+        params: { abilities: applied, heroes: heroApplied },
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
-      onProgress({ phase: 'phase1', message: `Ability shifts unavailable (kept previous values): ${message}` })
+      onProgress({
+        phase: 'phase1',
+        message: `Ability shifts unavailable (kept previous values): ${message}`,
+        messageKey: 'scraping.progress.shiftsUnavailable',
+      })
     }
 
+    // Keep the exact Windrun population for spreadsheet normalization, including
+    // entries whose static display metadata has not yet been published.
+    deps.metadata.set(
+      'windrun_priority_population',
+      JSON.stringify(
+        overallStats.map((stat) => ({
+          name:
+            stat.abilityId < 0
+              ? 'hero:' +
+                (staticHeroes[String(-stat.abilityId)]?.shortName ?? String(stat.abilityId))
+              : (abilityLookup.get(stat.abilityId)?.shortName ?? 'windrun:' + stat.abilityId),
+          winrate: stat.winrate,
+          pickRate: stat.avgPickPosition,
+          draftFrequency: stat.pickRate,
+        })),
+      ),
+    )
     deps.persist()
 
     // ── Phase 2: Pairs & Triplets ──────────────────────────────────────────
-    onProgress({ phase: 'phase2', message: 'Fetching ability pairs and triplets...' })
+    onProgress({
+      phase: 'phase2',
+      message: 'Fetching ability pairs and triplets...',
+      messageKey: 'scraping.progress.fetchCombos',
+    })
 
     const [pairsRes, tripletsRes] = await Promise.all([
       deps.apiClient.fetchAbilityPairs(options.patch),
@@ -186,7 +223,11 @@ export async function performFullScrape(
       pairsAbilityStats.length > 0 ? pairsAbilityStats : overallStats,
     )
 
-    onProgress({ phase: 'phase2', message: 'Transforming pairs...' })
+    onProgress({
+      phase: 'phase2',
+      message: 'Transforming pairs...',
+      messageKey: 'scraping.progress.transformCombos',
+    })
 
     const { abilityPairs, heroPairs } = transformPairs(
       pairsRes.data.abilityPairs ?? [],
@@ -207,6 +248,7 @@ export async function performFullScrape(
     onProgress({
       phase: 'phase2',
       message: `Inserting ${abilityPairs.length} ability pairs, ${heroPairs.length} hero pairs, ${abilityTriplets.length} ability triplets, ${heroTriplets.length} hero triplets...`,
+      messageKey: 'scraping.progress.insertCombos',
     })
 
     deps.synergies.clearAndInsertAbilitySynergies(
@@ -232,10 +274,7 @@ export async function performFullScrape(
       heroNameToIdMap,
     )
 
-    deps.triplets.clearAndInsertAbilityTriplets(
-      abilityTriplets,
-      abilityNameToIdMap,
-    )
+    deps.triplets.clearAndInsertAbilityTriplets(abilityTriplets, abilityNameToIdMap)
 
     deps.triplets.clearAndInsertHeroAbilityTriplets(
       heroTriplets,
@@ -255,11 +294,19 @@ export async function performFullScrape(
       ? detectModelGaps(deps.classNames, deps.abilities.getAllNames())
       : undefined
 
-    onProgress({ phase: 'done', message: 'Scrape completed successfully!' })
+    onProgress({
+      phase: 'done',
+      message: 'Scrape completed successfully!',
+      messageKey: 'scraping.progress.done',
+    })
     return { success: true, modelGaps: modelGaps ?? null }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    onProgress({ phase: 'error', message: `Scrape failed: ${message}` })
+    onProgress({
+      phase: 'error',
+      message: `Scrape failed: ${message}`,
+      messageKey: 'scraping.progress.failed',
+    })
     return { success: false, error: message }
   }
 }
@@ -279,6 +326,8 @@ function applySlotOverrides(
     onProgress({
       phase,
       message: `Applied ${applied} manual slot metadata overrides`,
+      messageKey: 'scraping.progress.slotOverrides',
+      params: { count: applied },
     })
   }
 }
@@ -294,7 +343,11 @@ export async function performLiquipediaEnrichment(
   onProgress: (progress: ScraperProgress) => void,
 ): Promise<ScraperResult> {
   try {
-    onProgress({ phase: 'liquipedia', message: 'Starting Liquipedia enrichment...' })
+    onProgress({
+      phase: 'liquipedia',
+      message: 'Starting Liquipedia enrichment...',
+      messageKey: 'scraping.liquipedia.progress.start',
+    })
 
     const heroPageNames = heroDisplayNames.map((name) => name.replace(/ /g, '_'))
     // Map page names back to the DB display names for per-hero matching
@@ -302,13 +355,19 @@ export async function performLiquipediaEnrichment(
       heroDisplayNames.map((name) => [name.replace(/ /g, '_'), name]),
     )
     const updates = await deps.enrichFromLiquipedia(heroPageNames, (msg) => {
-      onProgress({ phase: 'liquipedia', message: msg })
+      onProgress({
+        phase: 'liquipedia',
+        message: msg,
+        messageKey: 'scraping.liquipedia.progress.fetch',
+      })
     })
 
     if (updates.length > 0) {
       onProgress({
         phase: 'liquipedia',
         message: `Applying ${updates.length} Liquipedia updates...`,
+        messageKey: 'scraping.liquipedia.progress.apply',
+        params: { count: updates.length },
       })
 
       const applied = deps.abilities.applyLiquipediaMeta(
@@ -323,6 +382,8 @@ export async function performLiquipediaEnrichment(
       onProgress({
         phase: 'liquipedia',
         message: `Applied ${applied} of ${updates.length} Liquipedia updates`,
+        messageKey: 'scraping.liquipedia.progress.applied',
+        params: { count: applied, total: updates.length },
       })
 
       // Re-apply hand-curated slot corrections — they win over Liquipedia too
@@ -331,11 +392,19 @@ export async function performLiquipediaEnrichment(
       deps.persist()
     }
 
-    onProgress({ phase: 'done', message: 'Liquipedia enrichment completed!' })
+    onProgress({
+      phase: 'done',
+      message: 'Liquipedia enrichment completed!',
+      messageKey: 'scraping.liquipedia.progress.done',
+    })
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    onProgress({ phase: 'error', message: `Liquipedia enrichment failed: ${message}` })
+    onProgress({
+      phase: 'error',
+      message: `Liquipedia enrichment failed: ${message}`,
+      messageKey: 'scraping.liquipedia.progress.failed',
+    })
     return { success: false, error: message }
   }
 }

@@ -34,6 +34,7 @@ export interface ScoredEntity {
   winrate: number | null
   pickRate: number | null
   consolidatedScore: number
+  formulaPriority?: number | null
   isUltimateFromCoordSource?: boolean
   isUltimateFromDb?: boolean
   /** Hero-order on screen (present for both ability slots and hero entities). */
@@ -145,6 +146,7 @@ export interface DraftSessionState {
 // ---------------------------------------------------------------------------
 
 export interface HeroLookup {
+  getAll?(): import('@shared/types').Hero[]
   /** Hero-MODEL shift rows (name = hero internal name) for role-axes derivation. */
   getAllShifts(): import('@core/database/repositories/ability-repository').AbilityShiftRow[]
   getByAbilityName(
@@ -164,6 +166,7 @@ export interface HeroLookup {
 }
 
 export interface AbilityLookup {
+  getAll?(): AbilityDetail[]
   getDetails(names: string[]): Map<string, AbilityDetail>
 }
 
@@ -173,10 +176,7 @@ export interface AbilityShiftsLookup {
 }
 
 export interface SynergyLookup {
-  getHighWinrateCombinations(
-    baseAbilityName: string,
-    draftPoolNames: string[],
-  ): SynergyPartner[]
+  getHighWinrateCombinations(baseAbilityName: string, draftPoolNames: string[]): SynergyPartner[]
   getAllOPCombinations(threshold: number): AbilitySynergyPair[]
   getAllTrapCombinations(threshold: number): AbilitySynergyPair[]
   getAllHeroSynergies(threshold: number): HeroAbilitySynergyRow[]
@@ -185,9 +185,15 @@ export interface SynergyLookup {
 }
 
 export interface TripletLookup {
-  getThirdAbilitiesForPairs(
-    pairKeys: { a: number; b: number }[],
-  ): Map<string, { thirdAbilityName: string; thirdAbilityDisplayName: string; tripletWinrate: number; tripletPicks: number }[]>
+  getThirdAbilitiesForPairs(pairKeys: { a: number; b: number }[]): Map<
+    string,
+    {
+      thirdAbilityName: string
+      thirdAbilityDisplayName: string
+      tripletWinrate: number
+      tripletPicks: number
+    }[]
+  >
 }
 
 export interface AbilityIdLookup {
@@ -196,6 +202,7 @@ export interface AbilityIdLookup {
 
 export interface SettingsLookup {
   getSettings(): AppSettings
+  getPriorityPopulation?(): import('@shared/ability-priority').PriorityRow[] | null
 }
 
 /** Personal stats of the linked Windrun profile, keyed by internal names.

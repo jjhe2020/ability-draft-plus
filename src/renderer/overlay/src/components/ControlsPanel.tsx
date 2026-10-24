@@ -19,7 +19,7 @@ export function ControlsPanel({
   onClose,
   onReportFailed,
 }: ControlsPanelProps): React.ReactElement {
-  const { t } = useTranslation()
+  const { t } = useTranslation('overlay')
   const { onMouseEnter, onMouseLeave } = useMousePassthrough()
 
   const isScanning = scanState === 'scanning'
@@ -55,10 +55,7 @@ export function ControlsPanel({
             >
               {t('rescan')}
             </button>
-            <button
-              className="overlay-btn overlay-btn-yellow"
-              onClick={onReset}
-            >
+            <button className="overlay-btn overlay-btn-yellow" onClick={onReset}>
               {t('reset')}
             </button>
           </>

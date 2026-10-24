@@ -6,13 +6,20 @@ import { PlayerProfileCard } from '@/components/settings/player-profile-card'
 import { RoleCard } from '@/components/settings/role-card'
 import { BackupCard } from '@/components/settings/backup-card'
 import { FeedbackCard } from '@/components/settings/feedback-card'
+import { AbilityPriorityCard } from '@/components/settings/ability-priority-card'
 import { DEFAULT_OP_THRESHOLD, DEFAULT_TRAP_THRESHOLD } from '@shared/constants/thresholds'
 
 export function SettingsPage() {
-  const { settings, updateSetting } = useSettings()
+  const { settings, loading, error, updateSetting } = useSettings()
 
   return (
     <div className="space-y-6">
+      <AbilityPriorityCard
+        currentValue={settings?.abilityPriority ?? null}
+        loading={loading}
+        loadError={error}
+        onSave={updateSetting}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ThresholdCard
           settingsKey="opThreshold"

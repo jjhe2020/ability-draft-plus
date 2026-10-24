@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Copy, Check, Play, Square, ImageDown, Loader2 } from 'lucide-react'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -52,11 +46,7 @@ function BackgroundModeCard() {
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex items-center gap-2">
-          <Switch
-            id="overlay-background-mode"
-            checked={enabled}
-            onCheckedChange={handleToggle}
-          />
+          <Switch id="overlay-background-mode" checked={enabled} onCheckedChange={handleToggle} />
           <Label htmlFor="overlay-background-mode">{t('background.toggle')}</Label>
         </div>
         <p className="text-xs text-muted-foreground">{t('background.hint')}</p>
@@ -103,12 +93,7 @@ function IconPrefetchCard() {
         <CardDescription>{t('icons.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        <Button
-          variant="outline"
-          onClick={handlePrefetch}
-          disabled={prefetching}
-          className="gap-2"
-        >
+        <Button variant="outline" onClick={handlePrefetch} disabled={prefetching} className="gap-2">
           {prefetching ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -220,7 +205,7 @@ export function StreamingPage() {
         <CardContent className="space-y-4">
           {errorKey && (
             <p className="text-sm text-destructive" role="alert">
-              {t(errorKey)}
+              {t(errorKey, { defaultValue: t('server.status.error') })}
             </p>
           )}
 
@@ -270,11 +255,7 @@ export function StreamingPage() {
           )}
 
           <div className="flex items-center gap-2 pt-2">
-            <Switch
-              id="stream-autostart"
-              checked={autostart}
-              onCheckedChange={handleAutostart}
-            />
+            <Switch id="stream-autostart" checked={autostart} onCheckedChange={handleAutostart} />
             <Label htmlFor="stream-autostart">{t('server.autostart')}</Label>
           </div>
         </CardContent>

@@ -35,7 +35,7 @@ export function HeaderBar({ activePage }: HeaderBarProps) {
   const dispatch = useAppDispatch()
 
   const titleEntry = pageTitleKeys[activePage]
-  const pageTitle = t(`${titleEntry.key}`, { ns: titleEntry.ns })
+  const pageTitle = t(`${titleEntry.ns}:${titleEntry.key}`, { defaultValue: t('appTitle') })
 
   const handleLanguageChange = (lang: SupportedLanguage) => {
     dispatch(APP_ACTIONS.LANGUAGE_SET, lang)

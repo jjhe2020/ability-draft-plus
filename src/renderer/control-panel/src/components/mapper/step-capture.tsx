@@ -94,10 +94,7 @@ export function StepCapture({
               className="hidden"
               onChange={handleFileUpload}
             />
-            <Button
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-            >
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
               <Upload className="h-4 w-4 mr-2" />
               {t('mapper.capture.uploadButton')}
             </Button>
@@ -120,7 +117,7 @@ export function StepCapture({
           <div className="rounded-md border overflow-hidden">
             <img
               src={`data:image/png;base64,${imageBase64}`}
-              alt="Screenshot preview"
+              alt={t('mapper.capture.preview')}
               className="w-full h-auto"
             />
           </div>

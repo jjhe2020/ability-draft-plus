@@ -1,5 +1,6 @@
 import type { MlModelGaps } from '@core/ml/staleness-detector'
 import type { LayoutSource } from '@shared/ipc/api'
+import type { SupportedLanguage } from '@shared/constants/defaults'
 
 // @DEV-GUIDE: AppStore state shape and action constants for @zubridge dispatch.
 // Shared between main process (appStore.setState) and renderers (useAppStore hook).
@@ -8,13 +9,13 @@ import type { LayoutSource } from '@shared/ipc/api'
 // Each action maps to a handler in the main process app-store.ts that calls setState().
 // @zubridge automatically syncs this state across all renderer windows in real time.
 
-export interface AppStoreState {
+export type AppStoreState = {
   // Theme
   themeMode: 'light' | 'dark' | 'system'
   resolvedDarkMode: boolean
 
   // Language
-  language: 'en' | 'ru' | 'zh-CN'
+  language: SupportedLanguage
 
   // Overlay
   overlayActive: boolean
@@ -36,11 +37,15 @@ export interface AppStoreState {
   // Scraper Status
   scraperStatus: 'idle' | 'running' | 'error'
   scraperMessage: string | null
+  scraperMessageKey?: string | null
+  scraperMessageParams?: Record<string, string | number>
   scraperLastUpdated: string | null
 
   // Liquipedia Status (separate from Windrun scraper)
   liquipediaStatus: 'idle' | 'running' | 'error'
   liquipediaMessage: string | null
+  liquipediaMessageKey?: string | null
+  liquipediaMessageParams?: Record<string, string | number>
   liquipediaLastUpdated: string | null
 
   // Update Status

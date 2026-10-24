@@ -33,7 +33,7 @@ export function RolePanel({
   mySpotSelected,
   autoTracking,
 }: RolePanelProps): React.ReactElement {
-  const { t } = useTranslation()
+  const { t } = useTranslation('overlay')
   const { onMouseEnter, onMouseLeave } = useMousePassthrough()
   const [mode, setMode] = useState<RoleMode>('off')
   const [positions, setPositions] = useState<number[]>([])

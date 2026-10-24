@@ -11,14 +11,16 @@
   "pool": {
     "ultimates": "Ultimate Abilities",
     "standard": "Standard Abilities",
-    "modelPicked": "Drafted"
+    "modelPicked": "Drafted",
+    "aria": "Ability pool"
   },
   "panels": {
     "topWinrate": "Top Winrate",
     "opCombos": "Strongest Combos",
     "trapCombos": "Trap Combos",
     "topTier": "Top Picks",
-    "latestPicks": "Latest Picks"
+    "latestPicks": "Latest Picks",
+    "aria": "Draft statistics"
   },
   "avgPick": "Usually picked around #{{n}}",
   "player": "Player {{num}}",
@@ -35,7 +37,8 @@
     "confidence": {
       "low": "low",
       "medium": "med",
-      "high": "high"
+      "high": "high",
+      "none": "No data"
     }
   },
   "edit": {

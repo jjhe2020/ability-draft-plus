@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { StreamTeam } from '@shared/types/stream'
 import { usePicksState } from './hooks/use-picks-state'
@@ -6,6 +6,7 @@ import { parseStripOptions, type PicksBg } from './params'
 import { TeamStrip } from './components/TeamStrip'
 import { SetupPanel } from './components/SetupPanel'
 import i18n from './i18n'
+import { localizeDotaDisplay } from '@shared/localization/dota-names'
 
 // @DEV-GUIDE: Root of the Picks View SPA (Streamer View № 2). Two page modes on one
 // entry, split by the ?team= query param:
@@ -30,12 +31,13 @@ function resolveBg(explicit: PicksBg | null): PicksBg {
 }
 
 function StripPage({ team }: { team: StreamTeam }) {
-  const { t } = useTranslation()
-  const { picks } = usePicksState()
-  const options = parseStripOptions(
-    new URLSearchParams(window.location.search),
-    team,
+  const { t } = useTranslation('picks')
+  const { picks: rawPicks } = usePicksState()
+  const picks = useMemo(
+    () => localizeDotaDisplay(rawPicks, rawPicks?.meta.language ?? 'zh-CN'),
+    [rawPicks],
   )
+  const options = parseStripOptions(new URLSearchParams(window.location.search), team)
   const bg = resolveBg(options.bg)
 
   const language = picks?.meta.language

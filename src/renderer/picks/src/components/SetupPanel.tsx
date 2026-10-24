@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { localizeDotaDisplay } from '@shared/localization/dota-names'
 import { useTranslation } from 'react-i18next'
 import type { StreamTeam } from '@shared/types/stream'
 import { buildDemoPicksState } from '../demo'
@@ -92,7 +93,7 @@ function Seg<T extends string | boolean>({
 }
 
 function CopyUrl({ team, url }: { team: StreamTeam; url: string }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('picks')
   const [copied, setCopied] = useState(false)
 
   const copy = () => {
@@ -121,9 +122,9 @@ function CopyUrl({ team, url }: { team: StreamTeam; url: string }) {
 const SPACING_KEYS = ['rowGap', 'slotGap', 'heroGap', 'ultGap'] as const
 
 export function SetupPanel() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('picks')
   const [setup, setSetup] = useState<SetupState>(loadStoredSetup)
-  const [demo] = useState(buildDemoPicksState)
+  const [rawDemo] = useState(buildDemoPicksState)
   // Strips always render the demo draft here; the live feed only drives language.
   const { picks } = usePicksState()
 
@@ -132,6 +133,7 @@ export function SetupPanel() {
   }, [setup])
 
   const language = picks?.meta.language
+  const demo = useMemo(() => localizeDotaDisplay(rawDemo, language ?? 'zh-CN'), [rawDemo, language])
   useEffect(() => {
     if (language && i18n.language !== language) {
       void i18n.changeLanguage(language)
@@ -176,9 +178,7 @@ export function SetupPanel() {
                   { value: 'chroma', label: t('setup.bg.chroma') },
                   { value: 'dark', label: t('setup.bg.dark') },
                 ]}
-                onChange={(bg) =>
-                  setSetup((s) => ({ ...s, bg: bg === 'auto' ? null : bg }))
-                }
+                onChange={(bg) => setSetup((s) => ({ ...s, bg: bg === 'auto' ? null : bg }))}
               />
             </div>
             <div className="control-row">
@@ -238,18 +238,12 @@ export function SetupPanel() {
                   min={SPACING_LIMITS[key].min}
                   max={SPACING_LIMITS[key].max}
                   value={setup[key]}
-                  onChange={(e) =>
-                    setSetup((s) => ({ ...s, [key]: parseInt(e.target.value, 10) }))
-                  }
+                  onChange={(e) => setSetup((s) => ({ ...s, [key]: parseInt(e.target.value, 10) }))}
                 />
                 <span className="slider-value">{setup[key]}</span>
               </div>
             ))}
-            <button
-              type="button"
-              className="setup-reset"
-              onClick={() => setSetup(SETUP_DEFAULTS)}
-            >
+            <button type="button" className="setup-reset" onClick={() => setSetup(SETUP_DEFAULTS)}>
               {t('setup.reset')}
             </button>
           </div>

@@ -14,16 +14,17 @@ import fi from './locales/fi.json'
 // language setting, and App.tsx calls i18n.changeLanguage() when it changes.
 i18n.use(initReactI18next).init({
   resources: {
-    en: { translation: en },
-    ru: { translation: ru },
-    'zh-CN': { translation: zhCN },
-    es: { translation: es },
-    'pt-BR': { translation: ptBR },
-    uk: { translation: uk },
-    fil: { translation: fil },
-    fi: { translation: fi },
+    en: { picks: en },
+    ru: { picks: ru },
+    'zh-CN': { picks: zhCN },
+    es: { picks: es },
+    'pt-BR': { picks: ptBR },
+    uk: { picks: uk },
+    fil: { picks: fil },
+    fi: { picks: fi },
   },
-  lng: 'en',
+  defaultNS: 'picks',
+  lng: 'zh-CN',
   fallbackLng: 'en',
   interpolation: {
     escapeValue: false,

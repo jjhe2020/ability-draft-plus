@@ -44,5 +44,10 @@
     "tooltip": "Поддержать разработчика на Ko-fi",
     "datdota": "Поддержать datdota",
     "datdotaTooltip": "Поддержать datdota (данные Windrun) на Ko-fi"
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "unexpected": "An unexpected error occurred. Retry or switch pages.",
+    "details": "Technical details"
   }
 }

@@ -11,14 +11,16 @@
   "pool": {
     "ultimates": "Ульты",
     "standard": "Обычные способности",
-    "modelPicked": "Выбран"
+    "modelPicked": "Выбран",
+    "aria": "Ability pool"
   },
   "panels": {
     "topWinrate": "Лучший винрейт",
     "opCombos": "Сильнейшие комбинации",
     "trapCombos": "Комбинации-ловушки",
     "topTier": "Лучшие пики",
-    "latestPicks": "Последние пики"
+    "latestPicks": "Последние пики",
+    "aria": "Draft statistics"
   },
   "avgPick": "Обычно берут около #{{n}}",
   "player": "Игрок {{num}}",
@@ -35,7 +37,8 @@
     "confidence": {
       "low": "низк.",
       "medium": "средн.",
-      "high": "высок."
+      "high": "высок.",
+      "none": "No data"
     }
   },
   "edit": {

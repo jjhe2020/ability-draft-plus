@@ -13,7 +13,7 @@ import { portraitObjectPosition } from '../portrait-focus'
 // load fall back to the empty-socket look instead of a broken-image glyph.
 
 function AbilityTile({ pick, ult }: { pick: PicksAbility | null; ult: boolean }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('picks')
   const [failed, setFailed] = useState(false)
   const ultClass = ult ? ' tile-ult' : ''
 
@@ -39,20 +39,12 @@ function AbilityTile({ pick, ult }: { pick: PicksAbility | null; ult: boolean })
   )
 }
 
-function PlayerRow({
-  player,
-  showName,
-}: {
-  player: PicksPlayer
-  showName: boolean
-}) {
+function PlayerRow({ player, showName }: { player: PicksPlayer; showName: boolean }) {
   const [portraitFailed, setPortraitFailed] = useState(false)
 
   return (
     <div className="player">
-      {showName && player.playerName && (
-        <span className="nameplate">{player.playerName}</span>
-      )}
+      {showName && player.playerName && <span className="nameplate">{player.playerName}</span>}
       <div className="row">
         {player.portraitPath && !portraitFailed ? (
           <img
@@ -96,11 +88,7 @@ export function TeamStrip({
       }
     >
       {players.map((player) => (
-        <PlayerRow
-          key={player.playerIndex}
-          player={player}
-          showName={options.names}
-        />
+        <PlayerRow key={player.playerIndex} player={player} showName={options.names} />
       ))}
     </div>
   )

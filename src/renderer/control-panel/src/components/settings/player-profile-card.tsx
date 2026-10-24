@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import type { PlayerProfileInfo } from '@shared/types'
@@ -126,19 +120,13 @@ export function PlayerProfileCard() {
                 {busy ? t('personalStats.linking') : t('personalStats.linkButton')}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {t('personalStats.inputHint')}
-            </p>
+            <p className="text-xs text-muted-foreground">{t('personalStats.inputHint')}</p>
           </>
         ) : (
           <>
             <div className="flex items-center gap-3">
               {profile.avatarUrl && (
-                <img
-                  src={profile.avatarUrl}
-                  alt=""
-                  className="h-10 w-10 rounded-md"
-                />
+                <img src={profile.avatarUrl} alt="" className="h-10 w-10 rounded-md" />
               )}
               <div>
                 <p className="text-sm font-medium">
@@ -161,19 +149,17 @@ export function PlayerProfileCard() {
                 {t('personalStats.unlinkButton')}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {t('personalStats.blendNote')}
-            </p>
+            <p className="text-xs text-muted-foreground">{t('personalStats.blendNote')}</p>
           </>
         )}
 
-        {needsScrape && (
-          <p className="text-xs text-amber-500">{t('personalStats.scrapeHint')}</p>
+        {needsScrape && <p className="text-xs text-amber-500">{t('personalStats.scrapeHint')}</p>}
+        {errorKey && (
+          <p className="text-xs text-destructive">
+            {t(errorKey, { defaultValue: t('personalStats.errorFetchFailed') })}
+          </p>
         )}
-        {errorKey && <p className="text-xs text-destructive">{t(errorKey)}</p>}
-        {statusMessage && (
-          <p className="text-xs text-muted-foreground">{statusMessage}</p>
-        )}
+        {statusMessage && <p className="text-xs text-muted-foreground">{statusMessage}</p>}
       </CardContent>
     </Card>
   )

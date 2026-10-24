@@ -36,6 +36,10 @@ export function registerDatabaseHandlers(
     return dbService.abilities.getAll()
   })
 
+  ipcMain.handle('ability:getPriorityPopulation', () => {
+    return dbService.metadata.getPriorityPopulation()
+  })
+
   ipcMain.handle('ability:getDetails', (_event, data: { names: string[] }) => {
     const map = dbService.abilities.getDetails(data.names)
     return Array.from(map.values())

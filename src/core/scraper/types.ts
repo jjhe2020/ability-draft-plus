@@ -191,6 +191,8 @@ export interface TransformedHero {
   winrate: number
   highSkillWinrate: number | null
   pickRate: number
+  /** Overall Windrun pick frequency (0..1), separate from average pick position. */
+  draftFrequency?: number | null
   hsPickRate: number | null
   windrunId: number
 }
@@ -203,6 +205,8 @@ export interface TransformedAbility {
   winrate: number
   highSkillWinrate: number | null
   pickRate: number
+  /** Overall Windrun pick frequency (0..1), separate from average pick position. */
+  draftFrequency?: number | null
   hsPickRate: number | null
   isUltimate: boolean
   /** Windrun/Valve ability id (stat.abilityId) — stored for PlayerAbilityStats joins. */
@@ -252,6 +256,9 @@ export interface TransformedHeroAbilityTriplet {
 export interface ScraperProgress {
   phase: string
   message: string
+  /** Renderer translation; message remains available for diagnostic logs. */
+  messageKey?: string
+  params?: Record<string, string | number>
   current?: number
   total?: number
 }

@@ -1,10 +1,12 @@
 import { useCallback } from 'react'
 import type { HeroModelDisplay, SlotCoordinate } from '@shared/types'
+import { FormulaPriorityBadge } from './FormulaPriorityBadge'
 
 interface HeroModelHotspotProps {
   model: HeroModelDisplay
   coord: SlotCoordinate
   scaleFactor: number
+  priorityColor?: string
   isMyModel: boolean
   onHover: (model: HeroModelDisplay, rect: DOMRect) => void
   onLeave: () => void
@@ -14,6 +16,7 @@ export function HeroModelHotspot({
   model,
   coord,
   scaleFactor,
+  priorityColor,
   isMyModel,
   onHover,
   onLeave,
@@ -50,6 +53,11 @@ export function HeroModelHotspot({
       aria-label={model.heroDisplayName}
       id={`hero-model-hotspot-${model.heroOrder}`}
     >
+      <FormulaPriorityBadge
+        priority={model.formulaPriority}
+        priorityColor={priorityColor}
+        frameWidth={coord.width / scaleFactor}
+      />
       {/* Corner marker: recommended because of the linked profile's stats */}
       {model.isPersonallyDriven && <span className="personal-marker" />}
     </div>

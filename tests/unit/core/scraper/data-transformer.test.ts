@@ -107,6 +107,7 @@ describe('transformAbilitiesAndHeroes', () => {
     expect(ursa.winrate).toBe(0.52)
     expect(ursa.highSkillWinrate).toBe(0.55)
     expect(ursa.pickRate).toBe(4.5)
+    expect(ursa.draftFrequency).toBe(0.95)
     expect(ursa.hsPickRate).toBe(4.0)
   })
 
@@ -121,6 +122,7 @@ describe('transformAbilitiesAndHeroes', () => {
     expect(fury.winrate).toBe(0.55)
     expect(fury.highSkillWinrate).toBe(0.60)
     expect(fury.pickRate).toBe(2.6)
+    expect(fury.draftFrequency).toBe(0.99)
     expect(fury.hsPickRate).toBe(2.2)
   })
 

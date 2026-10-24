@@ -1,6 +1,14 @@
 import { NUM_TOP_TIER_SUGGESTIONS } from '@shared/constants/thresholds'
 import type { ScoredEntity, TopTierEntity } from './types'
 
+/** Preserve the actual formula order even for negative or unusually large results. */
+function compareEntities(a: ScoredEntity, b: ScoredEntity): number {
+  if (typeof a.formulaPriority === 'number' && typeof b.formulaPriority === 'number') {
+    return a.formulaPriority - b.formulaPriority
+  }
+  return b.consolidatedScore - a.consolidatedScore
+}
+
 // @DEV-GUIDE: Selects the top 10 recommended entities to highlight in the overlay.
 // Three-tier priority: 1) Synergy suggestions (abilities pairing well with user's
 // picks), 2) Curated role must-picks (roleCurated — roleMust entries in the tags
@@ -25,7 +33,7 @@ export function determineTopTierEntities(
   mySpotHasUlt: boolean,
   synergisticPartnersInPool: Set<string>,
 ): TopTierEntity[] {
-  let entitiesToConsider = [...allScoredEntities]
+  let entitiesToConsider = allScoredEntities.filter((entity) => entity.formulaPriority !== null)
   const finalTopTier: TopTierEntity[] = []
 
   let effectiveSynergyPartners = new Set(synergisticPartnersInPool)
@@ -42,9 +50,7 @@ export function determineTopTierEntities(
     // Also remove ultimate synergy partners
     const nonUltimateSynergies = new Set<string>()
     for (const partnerName of effectiveSynergyPartners) {
-      const partnerEntity = allScoredEntities.find(
-        (e) => e.internalName === partnerName,
-      )
+      const partnerEntity = allScoredEntities.find((e) => e.internalName === partnerName)
       if (
         partnerEntity &&
         !partnerEntity.isUltimateFromCoordSource &&
@@ -59,10 +65,7 @@ export function determineTopTierEntities(
   // Step 2: Extract synergy suggestions first
   const synergySuggestions: TopTierEntity[] = []
   entitiesToConsider = entitiesToConsider.filter((entity) => {
-    if (
-      entity.entityType === 'ability' &&
-      effectiveSynergyPartners.has(entity.internalName)
-    ) {
+    if (entity.entityType === 'ability' && effectiveSynergyPartners.has(entity.internalName)) {
       synergySuggestions.push({
         ...entity,
         isSynergySuggestionForMySpot: true,
@@ -72,10 +75,8 @@ export function determineTopTierEntities(
     }
     return true
   })
-  synergySuggestions.sort((a, b) => b.consolidatedScore - a.consolidatedScore)
-  finalTopTier.push(
-    ...synergySuggestions.slice(0, NUM_TOP_TIER_SUGGESTIONS),
-  )
+  synergySuggestions.sort(compareEntities)
+  finalTopTier.push(...synergySuggestions.slice(0, NUM_TOP_TIER_SUGGESTIONS))
 
   // Step 3: Curated role must-picks get guaranteed slots (that guarantee is
   // their entire mechanism — the stats already voted against them). A curated
@@ -96,12 +97,9 @@ export function determineTopTierEntities(
     }
     return true
   })
-  curatedSuggestions.sort((a, b) => b.consolidatedScore - a.consolidatedScore)
+  curatedSuggestions.sort(compareEntities)
   finalTopTier.push(
-    ...curatedSuggestions.slice(
-      0,
-      Math.max(0, NUM_TOP_TIER_SUGGESTIONS - finalTopTier.length),
-    ),
+    ...curatedSuggestions.slice(0, Math.max(0, NUM_TOP_TIER_SUGGESTIONS - finalTopTier.length)),
   )
 
   // Step 4: Fill remaining slots with general top picks
@@ -111,13 +109,11 @@ export function determineTopTierEntities(
 
     // When a hero model is selected, only suggest abilities (not hero models) as general picks
     if (selectedModelId !== null) {
-      generalCandidates = generalCandidates.filter(
-        (e) => e.entityType === 'ability',
-      )
+      generalCandidates = generalCandidates.filter((e) => e.entityType === 'ability')
     }
 
     const generalTopPicks = generalCandidates
-      .sort((a, b) => b.consolidatedScore - a.consolidatedScore)
+      .sort(compareEntities)
       .slice(0, remainingSlots)
       .map((entity) => ({
         ...entity,

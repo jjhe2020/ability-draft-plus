@@ -59,7 +59,12 @@ export function GsiSetupControls() {
       if (result.success && result.path) {
         setMessage({ text: t('gsi.writeSuccess', { path: result.path }), error: false })
       } else {
-        setMessage({ text: t(result.errorKey ?? 'gsi.errorWriteFailed'), error: true })
+        setMessage({
+          text: t(result.errorKey ?? 'gsi.errorWriteFailed', {
+            defaultValue: t('gsi.errorWriteFailed'),
+          }),
+          error: true,
+        })
       }
       refreshDetection()
     } finally {

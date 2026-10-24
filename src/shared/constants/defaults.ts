@@ -5,11 +5,13 @@ import {
   AUTO_INITIAL_SCAN_DELAY_S,
 } from './thresholds'
 import type { AppSettings } from '../types'
+import { DEFAULT_ABILITY_PRIORITY } from '../ability-priority'
 
 export const DEFAULT_SETTINGS: AppSettings = {
+  abilityPriority: DEFAULT_ABILITY_PRIORITY,
   opThreshold: DEFAULT_OP_THRESHOLD,
   trapThreshold: DEFAULT_TRAP_THRESHOLD,
-  language: 'en',
+  language: 'zh-CN',
   themeMode: 'system',
   overlayOpacity: 1,
   overlayAnchor: 'right',
@@ -25,16 +27,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   overlayBackgroundMode: false,
 }
 
-export const SUPPORTED_LANGUAGES = [
-  'en',
-  'ru',
-  'zh-CN',
-  'es',
-  'pt-BR',
-  'uk',
-  'fil',
-  'fi',
-] as const
+export const SUPPORTED_LANGUAGES = ['en', 'ru', 'zh-CN', 'es', 'pt-BR', 'uk', 'fil', 'fi'] as const
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 
 /** Display data for language pickers: `short` for compact triggers, `autonym`

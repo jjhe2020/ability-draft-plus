@@ -1,4 +1,22 @@
 {
+  "poolPriority": {
+    "title": "Match GGXGG pick distribution",
+    "ultimates": "Match ultimates",
+    "models": "Match hero models",
+    "abilityName": "Ability name",
+    "modelName": "Model name",
+    "priority": "GGXGG pick",
+    "legend": "Lower is better · Green → Yellow → Red",
+    "picked": "Picked",
+    "stats": "Match distribution statistics",
+    "mean": "Mean",
+    "variance": "Variance",
+    "std": "Std. deviation",
+    "populationNote": "{{count}} valid · Population variance ÷ N",
+    "missing": "{{count}} missing; excluded from stats. Enable GGXGG and refresh data, then rescan.",
+    "empty": "No entries identified",
+    "unknown": "Unidentified ultimate"
+  },
   "initialScan": "Initial Scan",
   "controlsAria": "Mga kontrol ng overlay",
   "rescan": "Rescan",
@@ -107,7 +125,10 @@
     "scepterStack": "Malakas na Scepter upgrade — isang Scepter ang magpapalakas din sa {{names}}",
     "goodShard": "Malakas na Aghanim's Shard upgrade",
     "goodScepter": "Malakas na Aghanim's Scepter upgrade",
-    "pointSinkConflict": "Nag-aagawan ng skill points kasama ang {{names}} — isa sa kanila ang maiiwan sa level"
+    "pointSinkConflict": "Nag-aagawan ng skill points kasama ang {{names}} — isa sa kanila ang maiiwan sa level",
+    "winrateShort": "WR",
+    "formulaPriority": "Formula priority (lower is stronger): {{value}}",
+    "formulaPriorityMissing": "Missing priority data. Update Windrun data."
   },
   "role": {
     "aria": "Mga role suggestion",

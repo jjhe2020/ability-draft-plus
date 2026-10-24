@@ -11,7 +11,7 @@ describe('createAppStore', () => {
     expect(state).toEqual({
       themeMode: 'system',
       resolvedDarkMode: true,
-      language: 'en',
+      language: 'zh-CN',
       overlayActive: false,
       overlayBackground: false,
       activeResolution: null,
@@ -229,14 +229,20 @@ describe('createAppStoreHandlers', () => {
     })
 
     it('sets update error', () => {
-      handlers[APP_ACTIONS.UPDATE_SET_STATUS]({ updateStatus: 'error', updateError: 'Network failed' })
+      handlers[APP_ACTIONS.UPDATE_SET_STATUS]({
+        updateStatus: 'error',
+        updateError: 'Network failed',
+      })
       const state = store.getState()
       expect(state.updateStatus).toBe('error')
       expect(state.updateError).toBe('Network failed')
     })
 
     it('sets downloaded status', () => {
-      handlers[APP_ACTIONS.UPDATE_SET_STATUS]({ updateStatus: 'downloaded', updateVersion: '2.1.0' })
+      handlers[APP_ACTIONS.UPDATE_SET_STATUS]({
+        updateStatus: 'downloaded',
+        updateVersion: '2.1.0',
+      })
       const state = store.getState()
       expect(state.updateStatus).toBe('downloaded')
       expect(state.updateVersion).toBe('2.1.0')

@@ -1,4 +1,22 @@
 {
+  "poolPriority": {
+    "title": "本场 GGXGG 选位分布",
+    "ultimates": "本场终极技能",
+    "models": "本场英雄模型",
+    "abilityName": "技能中文名",
+    "modelName": "模型中文名",
+    "priority": "GGXGG 选位",
+    "legend": "越低越优先 · 绿 → 黄 → 红",
+    "picked": "已选",
+    "stats": "本场分布统计",
+    "mean": "均值",
+    "variance": "方差",
+    "std": "标准差",
+    "populationNote": "{{count}} 项有效 · 总体方差 ÷ N",
+    "missing": "{{count}} 项数据不足，不计入统计。请启用 GGXGG、更新数据后重新扫描。",
+    "empty": "尚未识别到条目",
+    "unknown": "未识别大招"
+  },
   "initialScan": "初始扫描",
   "controlsAria": "覆盖层控件",
   "rescan": "重新扫描",
@@ -54,7 +72,7 @@
   "changeMyModel": "更改",
   "tooltip": {
     "winrate": "胜率：{{value}}",
-    "pickRate": "选取率：{{value}}",
+    "pickRate": "平均选位：{{value}}",
     "personalStats": "你的数据：{{games}} 场，胜率 {{value}}",
     "strongSynergies": "强协同技能",
     "heroSynergies": "英雄协同技能",
@@ -107,7 +125,10 @@
     "scepterStack": "强力神杖升级——一个神杖同时强化 {{names}}",
     "goodShard": "强力阿哈利姆魔晶升级",
     "goodScepter": "强力阿哈利姆神杖升级",
-    "pointSinkConflict": "与 {{names}} 争夺技能点——其中一个会长期等级不足"
+    "pointSinkConflict": "与 {{names}} 争夺技能点——其中一个会长期等级不足",
+    "winrateShort": "胜率",
+    "formulaPriority": "公式选位（越低越强）：{{value}}",
+    "formulaPriorityMissing": "选位数据不足，请更新 Windrun 数据"
   },
   "role": {
     "aria": "分路推荐",

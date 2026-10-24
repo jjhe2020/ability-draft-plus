@@ -2,7 +2,11 @@ import { app } from 'electron'
 import { join } from 'path'
 import { readFileSync } from 'fs'
 import log from 'electron-log/main'
-import { performFullScrape, performLiquipediaEnrichment, createWindrunApiClient } from '@core/scraper'
+import {
+  performFullScrape,
+  performLiquipediaEnrichment,
+  createWindrunApiClient,
+} from '@core/scraper'
 import type { ScraperDeps, LiquipediaDeps } from '@core/scraper'
 import type { MlModelGaps } from '@core/ml/staleness-detector'
 import type { DatabaseService } from './database-service'
@@ -36,9 +40,7 @@ export interface ScraperService {
 // the UI shows a warning (mlModelGaps). The gaps are persisted in the metadata table.
 function loadClassNames(): string[] {
   try {
-    const basePath = app.isPackaged
-      ? process.resourcesPath
-      : join(app.getAppPath(), 'resources')
+    const basePath = app.isPackaged ? process.resourcesPath : join(app.getAppPath(), 'resources')
     const classNamesPath = join(basePath, 'model', 'class_names.json')
     const raw = readFileSync(classNamesPath, 'utf-8')
     const parsed = JSON.parse(raw) as Record<string, string> | string[]
@@ -91,6 +93,8 @@ export function createScraperService(
       appStore.setState({
         scraperStatus: 'running',
         scraperMessage: 'Starting scrape...',
+        scraperMessageKey: 'scraping.progress.start',
+        scraperMessageParams: {},
       })
 
       const apiClient = createWindrunApiClient(undefined, loadClientTag())
@@ -109,7 +113,11 @@ export function createScraperService(
 
       performFullScrape(deps, (progress) => {
         logger.info(`Scraper [${progress.phase}]: ${progress.message}`)
-        appStore.setState({ scraperMessage: progress.message })
+        appStore.setState({
+          scraperMessage: progress.message,
+          scraperMessageKey: progress.messageKey,
+          scraperMessageParams: progress.params ?? {},
+        })
       })
         .then((result) => {
           if (result.success) {
@@ -117,6 +125,8 @@ export function createScraperService(
             appStore.setState({
               scraperStatus: 'idle',
               scraperMessage: 'Scrape completed successfully!',
+              scraperMessageKey: 'scraping.progress.done',
+              scraperMessageParams: {},
               scraperLastUpdated: lastUpdated,
             })
 
@@ -141,6 +151,8 @@ export function createScraperService(
             appStore.setState({
               scraperStatus: 'error',
               scraperMessage: result.error ?? 'Unknown error',
+              scraperMessageKey: 'scraping.progress.failed',
+              scraperMessageParams: {},
             })
           }
         })
@@ -149,6 +161,8 @@ export function createScraperService(
           appStore.setState({
             scraperStatus: 'error',
             scraperMessage: err instanceof Error ? err.message : String(err),
+            scraperMessageKey: 'scraping.progress.failed',
+            scraperMessageParams: {},
           })
         })
         .finally(() => {
@@ -171,6 +185,8 @@ export function createScraperService(
       appStore.setState({
         liquipediaStatus: 'running',
         liquipediaMessage: 'Starting Liquipedia enrichment...',
+        liquipediaMessageKey: 'scraping.liquipedia.progress.start',
+        liquipediaMessageParams: {},
       })
 
       // Get hero display names from DB
@@ -179,6 +195,8 @@ export function createScraperService(
         appStore.setState({
           liquipediaStatus: 'error',
           liquipediaMessage: 'No heroes in database. Run Windrun scrape first.',
+          liquipediaMessageKey: 'scraping.liquipedia.progress.noHeroes',
+          liquipediaMessageParams: {},
         })
         isLiquipediaRunning = false
         return
@@ -197,7 +215,11 @@ export function createScraperService(
 
       performLiquipediaEnrichment(deps, heroDisplayNames, (progress) => {
         logger.info(`Liquipedia [${progress.phase}]: ${progress.message}`)
-        appStore.setState({ liquipediaMessage: progress.message })
+        appStore.setState({
+          liquipediaMessage: progress.message,
+          liquipediaMessageKey: progress.messageKey,
+          liquipediaMessageParams: progress.params ?? {},
+        })
       })
         .then((result) => {
           if (result.success) {
@@ -207,12 +229,16 @@ export function createScraperService(
             appStore.setState({
               liquipediaStatus: 'idle',
               liquipediaMessage: 'Liquipedia enrichment completed!',
+              liquipediaMessageKey: 'scraping.liquipedia.progress.done',
+              liquipediaMessageParams: {},
               liquipediaLastUpdated: now,
             })
           } else {
             appStore.setState({
               liquipediaStatus: 'error',
               liquipediaMessage: result.error ?? 'Unknown error',
+              liquipediaMessageKey: 'scraping.liquipedia.progress.failed',
+              liquipediaMessageParams: {},
             })
           }
         })
@@ -221,6 +247,8 @@ export function createScraperService(
           appStore.setState({
             liquipediaStatus: 'error',
             liquipediaMessage: err instanceof Error ? err.message : String(err),
+            liquipediaMessageKey: 'scraping.liquipedia.progress.failed',
+            liquipediaMessageParams: {},
           })
         })
         .finally(() => {

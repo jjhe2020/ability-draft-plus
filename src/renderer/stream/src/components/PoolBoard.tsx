@@ -26,7 +26,7 @@ const STD_PAIRS: Array<[number, number]> = [
 ]
 
 function HeroMini({ row }: { row: StreamHeroRow | undefined }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('stream')
   const [failed, setFailed] = useState(false)
   const name = row?.heroDisplayName ?? t('unknownHero')
   const picked = row?.modelPicked === true
@@ -37,11 +37,7 @@ function HeroMini({ row }: { row: StreamHeroRow | undefined }) {
       title={picked ? `${name} — ${t('pool.modelPicked')}` : name}
     >
       {row?.portraitPath && !failed ? (
-        <img
-          src={`${apiBase()}${row.portraitPath}`}
-          alt={name}
-          onError={() => setFailed(true)}
-        />
+        <img src={`${apiBase()}${row.portraitPath}`} alt={name} onError={() => setFailed(true)} />
       ) : (
         <span className="pool-hero-mini-fallback">{name.charAt(0)}</span>
       )}
@@ -87,11 +83,11 @@ function PoolSlab() {
 }
 
 export function PoolBoard({ heroes }: { heroes: StreamHeroRow[] }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('stream')
   const byOrder = new Map(heroes.map((h) => [h.heroOrder, h]))
 
   return (
-    <section className="pool-board" aria-label="Ability pool">
+    <section className="pool-board" aria-label={t('pool.aria')}>
       <PoolSlab />
       <div className="pool-section-title">
         <span>{t('pool.ultimates')}</span>

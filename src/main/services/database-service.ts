@@ -46,6 +46,7 @@ import {
   type PlayerStatsRepository,
 } from '@core/database/repositories/player-stats-repository'
 import { DB_FILE_NAME } from '@shared/constants/database'
+import { DEFAULT_SETTINGS } from '@shared/constants/defaults'
 
 const logger = log.scope('database')
 
@@ -134,13 +135,20 @@ export function createDatabaseService(): DatabaseService {
     runColumnMigrations(sqliteDb)
 
     // 5. Create Drizzle instance
-    drizzleDb = drizzle(sqliteDb, { schema })
+    // Repositories use explicit table definitions, not Drizzle's relational query API.
+    drizzleDb = drizzle(sqliteDb)
 
     // 6. Persist (in case schema was just created for an empty DB)
     persist()
 
     // 7. Create repositories
     initRepositories()
+    // The bundled statistics DB contains the upstream author's English setting.
+    // A fresh install uses this build's default; existing user preferences persist.
+    if (firstRun) {
+      metadataRepo.setSettings({ language: DEFAULT_SETTINGS.language })
+      persist()
+    }
 
     // 8. Clean up duplicate heroes from seed/Windrun name mismatch
     const deduped = heroRepo.deduplicateByDisplayName()
@@ -179,7 +187,10 @@ export function createDatabaseService(): DatabaseService {
     sqliteDb.close()
     sqliteDb = new SQL.Database(data)
     sqliteDb.run('PRAGMA foreign_keys = ON;')
-    drizzleDb = drizzle(sqliteDb, { schema })
+    // Backups may predate schema additions, just like a database loaded at startup.
+    sqliteDb.run(SCHEMA_SQL)
+    runColumnMigrations(sqliteDb)
+    drizzleDb = drizzle(sqliteDb)
     initRepositories()
     logger.info('Database reloaded from new data')
   }
@@ -228,7 +239,7 @@ export function createDatabaseService(): DatabaseService {
 // in REAL columns are CAST to their numeric prefix in place.
 // Exported for unit testing.
 export function runColumnMigrations(db: SqlJsDatabase): void {
-  const tables = Object.values(schema).filter(
+  const tables = (Object.values(schema) as unknown[]).filter(
     (value): value is SQLiteTable => value instanceof SQLiteTable,
   )
 

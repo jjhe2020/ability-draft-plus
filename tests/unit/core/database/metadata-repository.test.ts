@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { createMetadataRepository, type MetadataRepository } from '@core/database/repositories/metadata-repository'
 import { createTestDb, seedTestData, type TestDb } from './test-helpers'
 import { DEFAULT_SETTINGS } from '@shared/constants/defaults'
+import { DEFAULT_ABILITY_PRIORITY } from '@shared/ability-priority'
 
 describe('MetadataRepository', () => {
   let testDb: TestDb
@@ -35,6 +36,32 @@ describe('MetadataRepository', () => {
   })
 
   describe('getSettings', () => {
+    it('persists editable priority rules and rejects invalid rules before any settings write', async () => {
+      const freshDb = await createTestDb()
+      const freshRepo = createMetadataRepository(freshDb.db)
+      expect(freshRepo.getSettings().abilityPriority).toEqual(DEFAULT_ABILITY_PRIORITY)
+      const config = { ...DEFAULT_ABILITY_PRIORITY, winWeight: -2, formula: '-winZ + pickZ' }
+      freshRepo.setSettings({ abilityPriority: config })
+      expect(freshRepo.getSettings().abilityPriority).toEqual(config)
+      expect(() => freshRepo.setSettings({ language: 'en', abilityPriority: { ...config, formula: 'process.exit()' } })).toThrow()
+      expect(freshRepo.getSettings().abilityPriority).toEqual(config)
+      expect(freshRepo.getSettings().language).toBe(DEFAULT_SETTINGS.language)
+      freshRepo.set('ability_priority', '{invalid')
+      expect(freshRepo.getSettings().abilityPriority).toEqual(DEFAULT_ABILITY_PRIORITY)
+      freshDb.close()
+    })
+
+    it('reads the exact Windrun population snapshot and rejects corrupt snapshot metadata', async () => {
+      const freshDb = await createTestDb()
+      const freshRepo = createMetadataRepository(freshDb.db)
+      expect(freshRepo.getPriorityPopulation()).toBeNull()
+      const rows = [{ name: 'hero:lina', winrate: 0.52, pickRate: 10, draftFrequency: 0.95 }]
+      freshRepo.set('windrun_priority_population', JSON.stringify(rows))
+      expect(freshRepo.getPriorityPopulation()).toEqual(rows)
+      freshRepo.set('windrun_priority_population', JSON.stringify([{ name: 'bad' }]))
+      expect(freshRepo.getPriorityPopulation()).toBeNull()
+      freshDb.close()
+    })
     it('returns defaults when no settings are stored', async () => {
       // Create a fresh DB with no settings
       const freshDb = await createTestDb()

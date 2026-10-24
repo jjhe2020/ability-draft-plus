@@ -1,6 +1,12 @@
 import { useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { EnrichedScanSlot, HeroModelDisplay, SynergyPairDisplay, HeroSynergyDisplay } from '@shared/types'
+import type { TFunction } from 'i18next'
+import type {
+  EnrichedScanSlot,
+  HeroModelDisplay,
+  SynergyPairDisplay,
+  HeroSynergyDisplay,
+} from '@shared/types'
 import {
   PERSONAL_SCORE_DELTA_EPSILON,
   ROLE_SCORE_DELTA_EPSILON,
@@ -21,19 +27,19 @@ const MAX_SYNERGIES = 5
 // Coerced defensively — v1-era databases can hold text-typed numerics (#77)
 function formatWinrate(value: number | null): string {
   const n = typeof value === 'number' ? value : Number(value)
-  if (value == null || Number.isNaN(n)) return 'N/A'
+  if (value == null || Number.isNaN(n)) return '—'
   return `${(n * 100).toFixed(1)}%`
 }
 
 function formatPickRate(value: number | null): string {
   const n = typeof value === 'number' ? value : Number(value)
-  if (value == null || Number.isNaN(n)) return 'N/A'
+  if (value == null || Number.isNaN(n)) return '—'
   return n.toFixed(2)
 }
 
 function formatSynergyWr(wr: number): string {
   const n = typeof wr === 'number' ? wr : Number(wr)
-  if (Number.isNaN(n)) return 'N/A'
+  if (Number.isNaN(n)) return '—'
   return `${(n * 100).toFixed(1)}%`
 }
 
@@ -49,21 +55,15 @@ function PersonalStatLine({
   games?: number
   winrate?: number
   scoreDelta?: number
-  t: (key: string, opts?: Record<string, string>) => string
+  t: TFunction<'overlay'>
 }): React.ReactElement | null {
   if (games == null || winrate == null) return null
 
   const delta = scoreDelta ?? 0
   const arrow =
-    delta > PERSONAL_SCORE_DELTA_EPSILON
-      ? '▲'
-      : delta < -PERSONAL_SCORE_DELTA_EPSILON
-        ? '▼'
-        : null
+    delta > PERSONAL_SCORE_DELTA_EPSILON ? '▲' : delta < -PERSONAL_SCORE_DELTA_EPSILON ? '▼' : null
   const arrowClass =
-    delta > PERSONAL_SCORE_DELTA_EPSILON
-      ? 'tooltip-personal-up'
-      : 'tooltip-personal-down'
+    delta > PERSONAL_SCORE_DELTA_EPSILON ? 'tooltip-personal-up' : 'tooltip-personal-down'
 
   return (
     <div className="tooltip-stat tooltip-personal">
@@ -86,7 +86,7 @@ function RoleStatLine({
 }: {
   scoreDelta?: number
   position?: number
-  t: (key: string, opts?: Record<string, string>) => string
+  t: TFunction<'overlay'>
 }): React.ReactElement | null {
   if (scoreDelta == null || position == null) return null
   if (Math.abs(scoreDelta) <= ROLE_SCORE_DELTA_EPSILON) return null
@@ -95,10 +95,7 @@ function RoleStatLine({
   return (
     <div className="tooltip-stat tooltip-role">
       {t('tooltip.roleFit', { position: String(position) })}
-      <span className={up ? 'tooltip-role-up' : 'tooltip-role-down'}>
-        {' '}
-        {up ? '▲' : '▼'}
-      </span>
+      <span className={up ? 'tooltip-role-up' : 'tooltip-role-down'}> {up ? '▲' : '▼'}</span>
     </div>
   )
 }
@@ -110,7 +107,7 @@ function PairingStatLine({
   t,
 }: {
   scoreDelta?: number
-  t: (key: string, opts?: Record<string, string>) => string
+  t: TFunction<'overlay'>
 }): React.ReactElement | null {
   if (scoreDelta == null) return null
   if (Math.abs(scoreDelta) <= ROLE_SCORE_DELTA_EPSILON) return null
@@ -119,10 +116,7 @@ function PairingStatLine({
   return (
     <div className="tooltip-stat tooltip-role">
       {t('tooltip.pairingFit')}
-      <span className={up ? 'tooltip-role-up' : 'tooltip-role-down'}>
-        {' '}
-        {up ? '▲' : '▼'}
-      </span>
+      <span className={up ? 'tooltip-role-up' : 'tooltip-role-down'}> {up ? '▲' : '▼'}</span>
     </div>
   )
 }
@@ -134,7 +128,7 @@ function RoleReasonChips({
   t,
 }: {
   reasons?: string[]
-  t: (key: string, opts?: Record<string, string>) => string
+  t: TFunction<'overlay'>
 }): React.ReactElement | null {
   if (!reasons || reasons.length === 0) return null
   return (
@@ -151,7 +145,7 @@ function RoleReasonChips({
         // Full-credit alternative match: the chip names the MATCHED tag, not
         // the need it satisfied ("Covers your missing nuke" — Shadow Realm
         // ruling). Partial credit says so explicitly and keeps the need name.
-        const need = t(`tooltip.roleNeeds.${via ?? key}`)
+        const need = t(`tooltip.roleNeeds.${via ?? key}`, { defaultValue: via ?? key })
         return (
           <span
             key={reason}
@@ -160,7 +154,9 @@ function RoleReasonChips({
             {kind === 'duplicate'
               ? t('tooltip.roleDuplicate', { need })
               : kind === 'partial'
-                ? t('tooltip.rolePartial', { need: t(`tooltip.roleNeeds.${key}`) })
+                ? t('tooltip.rolePartial', {
+                    need: t(`tooltip.roleNeeds.${key}`, { defaultValue: key }),
+                  })
                 : t('tooltip.roleCovers', { need })}
           </span>
         )
@@ -198,7 +194,7 @@ function positionTooltip(el: HTMLDivElement, anchorRect: DOMRect): void {
 }
 
 export function Tooltip({ data, anchorRect }: TooltipProps): React.ReactElement | null {
-  const { t } = useTranslation()
+  const { t } = useTranslation('overlay')
   const prevAnchorRef = useRef<DOMRect | null>(null)
 
   // Use callback ref to position immediately when DOM mounts/updates
@@ -236,7 +232,7 @@ function AbilityTooltipContent({
   t,
 }: {
   slot: EnrichedScanSlot
-  t: (key: string, opts?: Record<string, string>) => string
+  t: TFunction<'overlay'>
 }): React.ReactElement {
   if (slot.isUnknown) {
     return (
@@ -266,9 +262,7 @@ function AbilityTooltipContent({
             &#x2605; {t('tooltip.personalPick')}
           </div>
         ) : (
-          <div className="tooltip-badge tooltip-badge-top">
-            &#x2605; {t('tooltip.topPick')}
-          </div>
+          <div className="tooltip-badge tooltip-badge-top">&#x2605; {t('tooltip.topPick')}</div>
         ))}
 
       <div className="tooltip-title">{slot.displayName}</div>
@@ -278,17 +272,20 @@ function AbilityTooltipContent({
       <div className="tooltip-stat">
         {t('tooltip.pickRate', { value: formatPickRate(slot.pickRate) })}
       </div>
+      {slot.formulaPriority !== undefined && (
+        <div className="tooltip-stat">
+          {slot.formulaPriority === null
+            ? t('tooltip.formulaPriorityMissing')
+            : t('tooltip.formulaPriority', { value: slot.formulaPriority.toFixed(2) })}
+        </div>
+      )}
       <PersonalStatLine
         games={slot.personalGames}
         winrate={slot.personalWinrate}
         scoreDelta={slot.personalScoreDelta}
         t={t}
       />
-      <RoleStatLine
-        scoreDelta={slot.roleScoreDelta}
-        position={slot.roleBestPosition}
-        t={t}
-      />
+      <RoleStatLine scoreDelta={slot.roleScoreDelta} position={slot.roleBestPosition} t={t} />
       <RoleReasonChips reasons={slot.roleReasons} t={t} />
       <PairingStatLine scoreDelta={slot.pairingScoreDelta} t={t} />
       {slot.inertOnModel && (
@@ -321,9 +318,7 @@ function AbilityTooltipContent({
           {t('tooltip.shardStack', { names: slot.shardStackWith.join(', ') })}
         </div>
       ) : (
-        slot.goodShard && (
-          <div className="tooltip-stat tooltip-aghs">{t('tooltip.goodShard')}</div>
-        )
+        slot.goodShard && <div className="tooltip-stat tooltip-aghs">{t('tooltip.goodShard')}</div>
       )}
       {slot.scepterStackWith ? (
         <div className="tooltip-stat tooltip-aghs">
@@ -339,17 +334,14 @@ function AbilityTooltipContent({
           {t('tooltip.pointSinkConflict', { names: slot.pointSinkConflictWith.join(', ') })}
         </div>
       )}
-      {slot.contestedSoon &&
-        (slot.isGeneralTopTier || slot.isSynergySuggestionForMySpot) && (
-          <div className="tooltip-stat tooltip-contested">
-            {t('tooltip.contestedSoon')}
-          </div>
-        )}
+      {slot.contestedSoon && (slot.isGeneralTopTier || slot.isSynergySuggestionForMySpot) && (
+        <div className="tooltip-stat tooltip-contested">{t('tooltip.contestedSoon')}</div>
+      )}
 
       <SynergySection
         title={t('tooltip.strongSynergies')}
         items={slot.highWinrateCombinations}
-        renderItem={renderAbilitySynergy}
+        renderItem={(item, index) => renderAbilitySynergy(item, index, t('tooltip.winrateShort'))}
       />
       <HeroSynergySection
         title={t('tooltip.heroSynergies')}
@@ -359,7 +351,9 @@ function AbilityTooltipContent({
       <SynergySection
         title={t('tooltip.weakSynergies')}
         items={slot.lowWinrateCombinations}
-        renderItem={renderWeakAbilitySynergy}
+        renderItem={(item, index) =>
+          renderWeakAbilitySynergy(item, index, t('tooltip.winrateShort'))
+        }
       />
       <HeroSynergySection
         title={t('tooltip.weakHeroSynergies')}
@@ -376,7 +370,7 @@ function HeroTooltipContent({
   t,
 }: {
   model: HeroModelDisplay
-  t: (key: string, opts?: Record<string, string>) => string
+  t: TFunction<'overlay'>
 }): React.ReactElement {
   return (
     <>
@@ -390,9 +384,7 @@ function HeroTooltipContent({
             &#x2605; {t('tooltip.personalPick')}
           </div>
         ) : (
-          <div className="tooltip-badge tooltip-badge-model">
-            &#x2605; {t('tooltip.topModel')}
-          </div>
+          <div className="tooltip-badge tooltip-badge-model">&#x2605; {t('tooltip.topModel')}</div>
         ))}
 
       <div className="tooltip-title">{model.heroDisplayName}</div>
@@ -402,17 +394,20 @@ function HeroTooltipContent({
       <div className="tooltip-stat">
         {t('tooltip.pickRate', { value: formatPickRate(model.pickRate) })}
       </div>
+      {model.formulaPriority !== undefined && (
+        <div className="tooltip-stat">
+          {model.formulaPriority === null
+            ? t('tooltip.formulaPriorityMissing')
+            : t('tooltip.formulaPriority', { value: model.formulaPriority.toFixed(2) })}
+        </div>
+      )}
       <PersonalStatLine
         games={model.personalGames}
         winrate={model.personalWinrate}
         scoreDelta={model.personalScoreDelta}
         t={t}
       />
-      <RoleStatLine
-        scoreDelta={model.roleScoreDelta}
-        position={model.roleBestPosition}
-        t={t}
-      />
+      <RoleStatLine scoreDelta={model.roleScoreDelta} position={model.roleBestPosition} t={t} />
       <PairingStatLine scoreDelta={model.pairingScoreDelta} t={t} />
       {model.roleAvoided && (
         <div className="tooltip-stat tooltip-inert">{t('tooltip.roleAvoided')}</div>
@@ -460,6 +455,7 @@ function HeroSynergySection({
   weak?: boolean
   displayField?: 'abilityDisplayName' | 'heroDisplayName'
 }): React.ReactElement | null {
+  const { t } = useTranslation('overlay')
   if (items.length === 0) return null
   return (
     <>
@@ -471,7 +467,7 @@ function HeroSynergySection({
         >
           - {item[displayField]}{' '}
           <span className={weak ? 'tooltip-combo-weak' : 'tooltip-combo-winrate'}>
-            ({formatSynergyWr(item.synergyWinrate)} WR)
+            ({formatSynergyWr(item.synergyWinrate)} {t('tooltip.winrateShort')})
           </span>
         </div>
       ))}
@@ -479,23 +475,31 @@ function HeroSynergySection({
   )
 }
 
-function renderAbilitySynergy(item: SynergyPairDisplay, i: number): React.ReactElement {
+function renderAbilitySynergy(
+  item: SynergyPairDisplay,
+  i: number,
+  winrateLabel: string,
+): React.ReactElement {
   return (
     <div key={i} className="tooltip-combo">
       - {item.ability2DisplayName}{' '}
       <span className="tooltip-combo-winrate">
-        ({formatSynergyWr(item.synergyWinrate)} WR)
+        ({formatSynergyWr(item.synergyWinrate)} {winrateLabel})
       </span>
     </div>
   )
 }
 
-function renderWeakAbilitySynergy(item: SynergyPairDisplay, i: number): React.ReactElement {
+function renderWeakAbilitySynergy(
+  item: SynergyPairDisplay,
+  i: number,
+  winrateLabel: string,
+): React.ReactElement {
   return (
     <div key={i} className="tooltip-combo tooltip-combo-weak">
       - {item.ability2DisplayName}{' '}
       <span className="tooltip-combo-weak">
-        ({formatSynergyWr(item.synergyWinrate)} WR)
+        ({formatSynergyWr(item.synergyWinrate)} {winrateLabel})
       </span>
     </div>
   )

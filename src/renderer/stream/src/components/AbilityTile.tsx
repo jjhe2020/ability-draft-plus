@@ -13,7 +13,7 @@ interface AbilityTileProps {
 }
 
 export function AbilityTile({ slot, size = 'normal' }: AbilityTileProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('stream')
   const [iconFailed, setIconFailed] = useState(false)
 
   const displayName = slot.isUnknown ? t('unknownAbility') : slot.displayName

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useOverlayData } from './hooks/use-overlay-data'
 import { ControlsPanel } from './components/ControlsPanel'
@@ -8,8 +8,10 @@ import { HotspotLayer } from './components/HotspotLayer'
 import { CombinationPanel } from './components/CombinationPanel'
 import { DynamicButtons } from './components/DynamicButtons'
 import { RolePanel } from './components/RolePanel'
+import { PoolPriorityPanels } from './components/PoolPriorityPanels'
 import { useAppStore } from './hooks/use-app-store'
 import i18n from './i18n'
+import { localizeDotaDisplay } from '@shared/localization/dota-names'
 
 // @DEV-GUIDE: Root component for the overlay renderer. Renders on a transparent, click-through
 // window on top of the Dota 2 game. Body has pointer-events: none; interactive elements opt in.
@@ -28,9 +30,9 @@ import i18n from './i18n'
 const HIDE_SCAN_CONFIRM_KEY = 'hideInitialScanConfirm'
 
 function App(): React.ReactElement {
-  const { t } = useTranslation()
+  const { t } = useTranslation('overlay')
   const {
-    overlayData,
+    overlayData: rawOverlayData,
     selectedSpotHeroOrder,
     selectedModelHeroOrder,
     scanState,
@@ -59,6 +61,10 @@ function App(): React.ReactElement {
 
   // Sync language from @zubridge appStore
   const language = useAppStore((s) => s.language)
+  const overlayData = useMemo(
+    () => localizeDotaDisplay(rawOverlayData, language ?? 'zh-CN'),
+    [rawOverlayData, language],
+  )
   useEffect(() => {
     if (language && language !== i18n.language) {
       i18n.changeLanguage(language)
@@ -136,8 +142,7 @@ function App(): React.ReactElement {
         ? t('status.error', { message: scanError })
         : null
 
-  const statusVariant =
-    scanState === 'error' ? ('error' as const) : ('info' as const)
+  const statusVariant = scanState === 'error' ? ('error' as const) : ('info' as const)
 
   return (
     <div className={`overlay-root${scanState === 'scanning' ? ' capture-mode' : ''}`}>
@@ -156,6 +161,14 @@ function App(): React.ReactElement {
           overlayData={overlayData}
           selectedSpotHeroOrder={selectedSpotHeroOrder}
           selectedModelHeroOrder={selectedModelHeroOrder}
+        />
+      )}
+
+      {overlayData?.scanData && (
+        <PoolPriorityPanels
+          overlayData={overlayData}
+          controlsAnchor={overlayAnchor ?? 'right'}
+          opacity={overlayOpacity ?? 1}
         />
       )}
 
@@ -199,6 +212,11 @@ function App(): React.ReactElement {
         )}
 
         {/* Role-aware suggestions quick control */}
+        {overlayData?.abilityPriorityError && (
+          <div className="scan-summary scan-summary-warn" role="status">
+            {overlayData.abilityPriorityError}
+          </div>
+        )}
         <RolePanel
           roleContext={overlayData?.roleContext}
           hasScanData={overlayData?.scanData != null}
@@ -231,10 +249,7 @@ function App(): React.ReactElement {
 
       {/* Status Toast - z-index 10001 */}
       <StatusToast message={statusMessage} variant={statusVariant} />
-      <StatusToast
-        message={snapshotMessage}
-        variant={snapshotIsError ? 'error' : 'success'}
-      />
+      <StatusToast message={snapshotMessage} variant={snapshotIsError ? 'error' : 'success'} />
 
       {/* Scan Confirm Modal - z-index 10005 */}
       <ConfirmModal

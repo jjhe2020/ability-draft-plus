@@ -11,14 +11,16 @@
   "pool": {
     "ultimates": "Ульти",
     "standard": "Звичайні здібності",
-    "modelPicked": "Вибрано"
+    "modelPicked": "Вибрано",
+    "aria": "Ability pool"
   },
   "panels": {
     "topWinrate": "Найкращий вінрейт",
     "opCombos": "Найсильніші комбінації",
     "trapCombos": "Комбінації-пастки",
     "topTier": "Найкращі піки",
-    "latestPicks": "Останні піки"
+    "latestPicks": "Останні піки",
+    "aria": "Draft statistics"
   },
   "avgPick": "Зазвичай беруть близько #{{n}}",
   "player": "Гравець {{num}}",
@@ -35,7 +37,8 @@
     "confidence": {
       "low": "низьк.",
       "medium": "середн.",
-      "high": "висок."
+      "high": "висок.",
+      "none": "No data"
     }
   },
   "edit": {

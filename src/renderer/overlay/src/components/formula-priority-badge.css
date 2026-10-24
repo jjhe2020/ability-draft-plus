@@ -1,0 +1,35 @@
+.formula-priority-badge {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  z-index: 1;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  max-width: calc(100% - 4px);
+  padding: 1px 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  background: rgba(10, 15, 20, 0.93);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.formula-priority-badge-raised {
+  bottom: 14px;
+}
+
+.formula-priority-badge-missing {
+  color: #b9c1cc;
+}
+
+/* Filled labels must disappear before ML captures the underlying icons. */
+.capture-mode .formula-priority-badge {
+  display: none !important;
+}

@@ -40,6 +40,10 @@ export interface IpcInvokeMap {
   'hero:getById': { request: { id: number }; response: Hero | null }
   'ability:getDetails': { request: { names: string[] }; response: AbilityDetail[] }
   'ability:getAll': { request: void; response: AbilityDetail[] }
+  'ability:getPriorityPopulation': {
+    request: void
+    response: import('../ability-priority').PriorityRow[] | null
+  }
   'ability:getByHeroId': { request: { heroId: number }; response: AbilityDetail[] }
   'settings:get': { request: void; response: AppSettings }
   'settings:set': { request: Partial<AppSettings>; response: void }
@@ -172,6 +176,8 @@ export interface IpcInvokeMap {
       cfgExists: boolean
       /** Port pinned in the existing cfg's uri; null if absent/unparseable. */
       cfgPort: number | null
+      /** True when the installed GSI configuration needs refreshing. */
+      cfgOutdated: boolean
     }
   }
   'gsi:writeCfg': {

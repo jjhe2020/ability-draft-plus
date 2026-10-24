@@ -1,4 +1,22 @@
 {
+  "poolPriority": {
+    "title": "Match GGXGG pick distribution",
+    "ultimates": "Match ultimates",
+    "models": "Match hero models",
+    "abilityName": "Ability name",
+    "modelName": "Model name",
+    "priority": "GGXGG pick",
+    "legend": "Lower is better · Green → Yellow → Red",
+    "picked": "Picked",
+    "stats": "Match distribution statistics",
+    "mean": "Mean",
+    "variance": "Variance",
+    "std": "Std. deviation",
+    "populationNote": "{{count}} valid · Population variance ÷ N",
+    "missing": "{{count}} missing; excluded from stats. Enable GGXGG and refresh data, then rescan.",
+    "empty": "No entries identified",
+    "unknown": "Unidentified ultimate"
+  },
   "initialScan": "Начальное сканирование",
   "controlsAria": "Панель управления оверлея",
   "rescan": "Повторное сканирование",
@@ -107,7 +125,10 @@
     "scepterStack": "Сильный апгрейд от Scepter — один Scepter усилит и {{names}}",
     "goodShard": "Сильный апгрейд от Aghanim's Shard",
     "goodScepter": "Сильный апгрейд от Aghanim's Scepter",
-    "pointSinkConflict": "Конкурирует за очки навыков с {{names}} — одна из них останется недокачанной"
+    "pointSinkConflict": "Конкурирует за очки навыков с {{names}} — одна из них останется недокачанной",
+    "winrateShort": "WR",
+    "formulaPriority": "Formula priority (lower is stronger): {{value}}",
+    "formulaPriorityMissing": "Missing priority data. Update Windrun data."
   },
   "role": {
     "aria": "Подсказки по ролям",

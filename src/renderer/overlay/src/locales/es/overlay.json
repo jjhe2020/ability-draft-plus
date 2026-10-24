@@ -1,4 +1,22 @@
 {
+  "poolPriority": {
+    "title": "Match GGXGG pick distribution",
+    "ultimates": "Match ultimates",
+    "models": "Match hero models",
+    "abilityName": "Ability name",
+    "modelName": "Model name",
+    "priority": "GGXGG pick",
+    "legend": "Lower is better · Green → Yellow → Red",
+    "picked": "Picked",
+    "stats": "Match distribution statistics",
+    "mean": "Mean",
+    "variance": "Variance",
+    "std": "Std. deviation",
+    "populationNote": "{{count}} valid · Population variance ÷ N",
+    "missing": "{{count}} missing; excluded from stats. Enable GGXGG and refresh data, then rescan.",
+    "empty": "No entries identified",
+    "unknown": "Unidentified ultimate"
+  },
   "initialScan": "Escaneo inicial",
   "controlsAria": "Controles del overlay",
   "rescan": "Reescanear",
@@ -107,7 +125,10 @@
     "scepterStack": "Gran mejora de Scepter — un solo Scepter también potencia {{names}}",
     "goodShard": "Gran mejora con Aghanim's Shard",
     "goodScepter": "Gran mejora con Aghanim's Scepter",
-    "pointSinkConflict": "Compite por puntos de habilidad con {{names}} — una de las dos quedará sin subir"
+    "pointSinkConflict": "Compite por puntos de habilidad con {{names}} — una de las dos quedará sin subir",
+    "winrateShort": "WR",
+    "formulaPriority": "Formula priority (lower is stronger): {{value}}",
+    "formulaPriorityMissing": "Missing priority data. Update Windrun data."
   },
   "role": {
     "aria": "Sugerencias según rol",

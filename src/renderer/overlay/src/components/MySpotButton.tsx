@@ -19,7 +19,7 @@ export function MySpotButton({
   isSelected,
   anySelected,
 }: MySpotButtonProps): React.ReactElement | null {
-  const { t } = useTranslation()
+  const { t } = useTranslation('overlay')
   const { onMouseEnter, onMouseLeave } = useMousePassthrough()
 
   // Hide if another hero is selected (not this one)
@@ -36,9 +36,7 @@ export function MySpotButton({
   const style: React.CSSProperties = {
     top: heroBoxY + heroBoxHeight / 2,
     transform: `translateY(-50%)${isLeftSide ? ' translateX(-100%)' : ''}`,
-    left: isLeftSide
-      ? heroBoxX - MY_SPOT_MARGIN
-      : heroBoxX + heroBoxWidth + MY_SPOT_MARGIN,
+    left: isLeftSide ? heroBoxX - MY_SPOT_MARGIN : heroBoxX + heroBoxWidth + MY_SPOT_MARGIN,
   }
 
   const handleClick = (): void => {

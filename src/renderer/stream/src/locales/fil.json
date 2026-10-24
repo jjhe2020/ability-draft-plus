@@ -11,14 +11,16 @@
   "pool": {
     "ultimates": "Mga Ultimate Ability",
     "standard": "Mga Standard Ability",
-    "modelPicked": "Na-draft na"
+    "modelPicked": "Na-draft na",
+    "aria": "Ability pool"
   },
   "panels": {
     "topWinrate": "Top Winrate",
     "opCombos": "Pinakamalakas na Combos",
     "trapCombos": "Trap Combos",
     "topTier": "Top Picks",
-    "latestPicks": "Pinakabagong Picks"
+    "latestPicks": "Pinakabagong Picks",
+    "aria": "Draft statistics"
   },
   "avgPick": "Karaniwang pinipili bandang #{{n}}",
   "player": "Player {{num}}",
@@ -35,7 +37,8 @@
     "confidence": {
       "low": "mababa",
       "medium": "katamtaman",
-      "high": "mataas"
+      "high": "mataas",
+      "none": "No data"
     }
   },
   "edit": {

@@ -26,7 +26,7 @@ function CardArt({ model }: { model: StreamPlayerModel }) {
 }
 
 function PlayerCard({ player }: { player: StreamPlayerRow }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('stream')
   const name = player.playerName ?? t('player', { num: player.playerIndex + 1 })
   const score = player.draftScore
 
@@ -70,14 +70,8 @@ function PlayerCard({ player }: { player: StreamPlayerRow }) {
   )
 }
 
-export function PlayerColumn({
-  team,
-  players,
-}: {
-  team: StreamTeam
-  players: StreamPlayerRow[]
-}) {
-  const { t } = useTranslation()
+export function PlayerColumn({ team, players }: { team: StreamTeam; players: StreamPlayerRow[] }) {
+  const { t } = useTranslation('stream')
   // Bundled banner art (resources/data/stream/<team>-cap.png|jpg). When present
   // the header goes box-less: the banner spans the column and the team name
   // tucks under its long tail, beside the gem head. Boxed style is the fallback.
@@ -85,8 +79,7 @@ export function PlayerColumn({
   const scores = players
     .map((p) => p.draftScore?.score)
     .filter((s): s is number => s !== null && s !== undefined)
-  const teamAverage =
-    scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null
+  const teamAverage = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null
 
   return (
     <section className={`team-column team-${team}`} aria-label={t(`team.${team}`)}>

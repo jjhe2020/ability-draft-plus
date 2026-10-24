@@ -24,7 +24,7 @@ export function createAppStore() {
   return createStore<AppStoreState>(() => ({
     themeMode: 'system',
     resolvedDarkMode: true,
-    language: 'en',
+    language: 'zh-CN',
     overlayActive: false,
     overlayBackground: false,
     activeResolution: null,

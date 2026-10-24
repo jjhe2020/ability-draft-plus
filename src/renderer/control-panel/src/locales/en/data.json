@@ -50,7 +50,8 @@
       "ultimate": "Ultimate"
     },
     "filterPlaceholder": "Filter abilities...",
-    "noResults": "No abilities found."
+    "noResults": "No abilities found.",
+    "unknownHero": "Unknown hero ({{id}})"
   },
   "heroes": {
     "title": "Heroes",
@@ -77,7 +78,33 @@
       "updateButton": "Enrich from Liquipedia",
       "running": "Enriching...",
       "warning": "This takes ~67 minutes for all heroes due to Liquipedia rate limits.",
-      "lastUpdated": "Last enriched:"
+      "lastUpdated": "Last enriched:",
+      "progress": {
+        "start": "Starting Liquipedia enrichment…",
+        "fetch": "Fetching hero ability slot metadata…",
+        "apply": "Applying {{count}} Liquipedia updates…",
+        "applied": "Applied {{count}} / {{total}} Liquipedia updates.",
+        "done": "Liquipedia enrichment complete.",
+        "failed": "Liquipedia enrichment failed. Check your connection and retry.",
+        "noHeroes": "No heroes in the database. Update Windrun data first."
+      }
+    },
+    "progress": {
+      "start": "Starting Windrun data update…",
+      "fetchStatic": "Fetching Windrun ability and hero metadata…",
+      "fetchStats": "Fetching ability statistics…",
+      "transform": "Processing Windrun statistics…",
+      "upsert": "Updating {{heroes}} heroes and {{abilities}} abilities…",
+      "prune": "Removed {{count}} obsolete abilities.",
+      "shifts": "Updated role data for {{abilities}} abilities and {{heroes}} heroes.",
+      "shiftsUnavailable": "Role data is unavailable. Previous values have been retained.",
+      "fetchCombos": "Fetching ability pairs and triplets…",
+      "transformCombos": "Processing combination statistics…",
+      "insertCombos": "Saving combination statistics…",
+      "slotOverrides": "Applied {{count}} ability slot corrections.",
+      "done": "Windrun data updated successfully.",
+      "failed": "Windrun data update failed. Check your connection and retry.",
+      "details": "Technical details"
     }
   },
   "mapper": {
@@ -91,7 +118,8 @@
       "capturing": "Capturing...",
       "retake": "Retake",
       "next": "Next",
-      "uploadButton": "Upload Image"
+      "uploadButton": "Upload Image",
+      "preview": "Screenshot preview"
     },
     "autoDetect": {
       "title": "Auto-Detection",
@@ -108,7 +136,8 @@
       "calibrate": "Calibrate (4 clicks)",
       "done": "Layout is ready. No calibration needed.",
       "submitScreenshot": "Submit Screenshot",
-      "noLayoutHelp": "No layout available for this resolution. Submit your screenshot and we'll add support."
+      "noLayoutHelp": "No layout available for this resolution. Submit your screenshot and we'll add support.",
+      "detecting": "Detecting resolution…"
     },
     "report": {
       "button": "Report Failed Mapping",
@@ -156,5 +185,14 @@
       "zoomTip": "Scroll to zoom, Ctrl+drag to pan"
     }
   },
-  "noResults": "No results."
+  "noResults": "No results.",
+  "table": {
+    "rows": "{{count}} rows",
+    "page": "Page {{current}} of {{total}}",
+    "firstPage": "First page",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "lastPage": "Last page",
+    "filter": "Filter…"
+  }
 }
