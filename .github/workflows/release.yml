@@ -69,7 +69,7 @@ jobs:
             "AbilityDraftPlus-Setup-$env:RELEASE_VERSION-x64.exe",
             "AbilityDraftPlus-Portable-$env:RELEASE_VERSION-x64.exe",
             "AbilityDraftPlus-$env:RELEASE_VERSION-Windows-x64.zip",
-            '使用说明.txt',
+            'README-zh-CN.txt',
             'SHA256SUMS.txt',
             'release-notes.md'
           )

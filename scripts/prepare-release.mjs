@@ -55,15 +55,18 @@ Windows 提示
 完整项目及发布记录：https://github.com/jjhe2020/ability-draft-plus
 基于 Tiarin Hino 的 Ability Draft Plus 项目修改，原 ISC 许可证见 LICENSE.txt。
 `
-await writeFile(join(share, '使用说明.txt'), '\uFEFF' + instructions.replaceAll('\n', '\r\n'), 'utf8')
+// GitHub sanitizes non-ASCII asset names to default.txt. Keep attachment names ASCII.
+const instructionsName = 'README-zh-CN.txt'
+await writeFile(join(share, instructionsName), '\uFEFF' + instructions.replaceAll('\n', '\r\n'), 'utf8')
 await copyFile(join(root, 'LICENSE'), join(share, 'LICENSE.txt'))
 
 const zipName = `AbilityDraftPlus-${version}-Windows-x64.zip`
 const zip = new AdmZip()
-for (const name of [portable, '使用说明.txt', 'LICENSE.txt']) zip.addLocalFile(join(share, name))
+for (const name of [portable, 'LICENSE.txt']) zip.addLocalFile(join(share, name))
+zip.addFile('使用说明.txt', await readFile(join(share, instructionsName)))
 zip.writeZip(join(share, zipName))
 
-const assetNames = [installer, portable, zipName, '使用说明.txt', 'LICENSE.txt']
+const assetNames = [installer, portable, zipName, instructionsName, 'LICENSE.txt']
 const checksums = []
 for (const name of assetNames) {
   const hash = createHash('sha256')
