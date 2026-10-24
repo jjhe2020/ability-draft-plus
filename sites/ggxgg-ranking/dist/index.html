@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101311" />
+    <meta
+      name="description"
+      content="用 GGXGG 选位公式读懂 Dota 2 技能征召：中文技能与英雄模型排名、清晰图标与可编辑规则，让每一次先手都有依据。"
+    />
+    <title>征召强度榜 · GGXGG 技能征召</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css?v=b6498aa66f12" />
+    <script type="module" src="./app.js?v=5ca762c4e1d7"></script>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header">
+        <a class="brand" href="./" aria-label="GGXGG 技能征召首页">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="brand-text">GGXGG<span>技能征召</span></span>
+        </a>
+        <nav class="header-nav" aria-label="页面导航">
+          <span class="nav-active">征召强度榜</span>
+          <a
+            id="windrun-link"
+            href="https://windrun.io/abilities"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Windrun 数据 <span aria-hidden="true">↗</span></a
+          >
+        </nav>
+        <button class="button button-outline header-formula" id="open-formula">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M3 5h14M3 10h14M3 15h14M7 3v4m6 1v4m-6 1v4" /></svg
+          >调整选位公式
+        </button>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <div class="intro-copy">
+            <div class="eyebrow">
+              <span class="status-dot"></span>DOTA 2 · ABILITY DRAFT<span class="edition"
+                >GGXGG 选位公式</span
+              >
+            </div>
+            <h1 id="page-title">征召<span>强度榜</span><span class="title-period">.</span></h1>
+            <p class="intro-description">
+              技能与英雄模型混合排名，结合胜率、选位和选取频率，按 GGXGG 公式一览优先级。
+            </p>
+          </div>
+          <div class="rule-note">
+            <span class="rule-note-label">读榜方式 <span aria-hidden="true">↙</span></span>
+            <div class="rule-value">
+              <span class="rule-mini">GGXGG<br />公式选位</span
+              ><strong>越低<span>越强</span></strong>
+            </div>
+            <p>负数也是有效结果。<br />相同公式，全量数据，统一比较。</p>
+          </div>
+        </section>
+
+        <section class="data-strip" aria-label="数据概况">
+          <div class="data-item">
+            <span class="data-label">纳入排名</span><strong id="ability-count">—</strong
+            ><span class="data-unit">个技能</span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">英雄模型</span><strong id="hero-count">—</strong
+            ><span class="data-unit">位</span>
+          </div>
+          <div class="data-item data-version">
+            <span class="data-label">数据版本</span><strong id="patch">—</strong>
+          </div>
+          <div class="data-item data-updated">
+            <span class="status-dot"></span><span id="snapshot-label">正在读取数据快照</span>
+          </div>
+        </section>
+
+        <div class="snapshot-notice" id="snapshot-notice" hidden>
+          <span class="snapshot-badge">历史快照</span>
+          <p id="snapshot-note"></p>
+        </div>
+
+        <section class="ranking-panel" aria-labelledby="ranking-title">
+          <div class="ranking-heading">
+            <div>
+              <div class="section-eyebrow">按公式选位排序 · 数值越低越优先</div>
+              <h2 id="ranking-title">
+                <span id="ranking-title-label">综合排名</span> <span id="result-count">—</span>
+              </h2>
+            </div>
+            <div class="ranking-heading-actions">
+              <span class="formula-state" id="formula-state"
+                ><span class="status-dot"></span>GGXGG 默认规则</span
+              ><button class="text-button export-button" id="export-csv" disabled>
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M10 2v10m-4-4 4 4 4-4M3 12v5h14v-5" /></svg
+                >导出榜单
+              </button>
+            </div>
+          </div>
+
+          <div class="table-toolbar">
+            <div class="tabs" role="tablist" aria-label="榜单类型">
+              <button
+                id="tab-all"
+                role="tab"
+                aria-selected="true"
+                class="tab active"
+                data-type="all"
+              >
+                混合总榜<span id="count-all">—</span>
+              </button>
+              <button
+                id="tab-skills"
+                role="tab"
+                aria-selected="false"
+                class="tab"
+                data-type="skills"
+                tabindex="-1"
+              >
+                仅看技能<span id="count-skills">—</span>
+              </button>
+              <button
+                id="tab-normal"
+                role="tab"
+                aria-selected="false"
+                class="tab"
+                data-type="normal"
+                tabindex="-1"
+              >
+                普通技能<span id="count-normal">—</span>
+              </button>
+              <button
+                id="tab-ultimate"
+                role="tab"
+                aria-selected="false"
+                class="tab"
+                data-type="ultimate"
+                tabindex="-1"
+              >
+                终极技能<span id="count-ultimate">—</span>
+              </button>
+              <button
+                id="tab-heroes"
+                role="tab"
+                aria-selected="false"
+                class="tab model-tab"
+                data-type="heroes"
+                tabindex="-1"
+              >
+                英雄模型<span id="count-heroes">—</span>
+              </button>
+            </div>
+            <div class="filter-controls">
+              <label class="search-field"
+                ><svg viewBox="0 0 20 20" aria-hidden="true">
+                  <circle cx="8.5" cy="8.5" r="5.5" />
+                  <path d="m13 13 4 4" /></svg
+                ><input
+                  id="search"
+                  type="search"
+                  placeholder="搜索技能 / 英雄"
+                  aria-label="搜索中文、英文技能或英雄"
+                  autocomplete="off"
+                /><kbd>/</kbd></label
+              >
+              <label class="hero-select" id="hero-filter-control"
+                ><span class="sr-only">按英雄筛选</span
+                ><select id="hero-filter">
+                  <option value="">全部英雄</option></select
+                ><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg
+              ></label>
+            </div>
+          </div>
+
+          <div class="active-filter-bar" id="active-filter-bar" hidden>
+            <span id="filter-description"></span
+            ><button class="text-button" id="clear-filters">
+              清除筛选 <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <p class="model-note" id="model-note">
+            英雄模型与技能在征召中共同选择，按同一公式混合排名；所有分类、搜索与排序均保留总榜名次。
+          </p>
+          <p class="mobile-table-note">点击名称查看数据与公式；分类筛选保留总榜名次。</p>
+          <div class="table-scroll" id="table-scroll" aria-busy="true">
+            <table>
+              <thead>
+                <tr>
+                  <th class="rank-column" scope="col">
+                    <span class="desktop-rank-label">总榜</span>排名
+                  </th>
+                  <th class="ability-column" scope="col" id="identity-heading">技能 / 英雄模型</th>
+                  <th class="win-column numeric" scope="col" aria-sort="none">
+                    <button class="sort-button" data-sort="winrate">
+                      胜率<span class="sort-icon" aria-hidden="true">↕</span>
+                    </button>
+                  </th>
+                  <th class="pick-column numeric" scope="col" aria-sort="none">
+                    <button class="sort-button" data-sort="pickRate">
+                      平均选位<span class="sort-icon" aria-hidden="true">↕</span>
+                    </button>
+                  </th>
+                  <th class="frequency-column numeric" scope="col" aria-sort="none">
+                    <button class="sort-button" data-sort="draftFrequency">
+                      选取频率<span class="sort-icon" aria-hidden="true">↕</span>
+                    </button>
+                  </th>
+                  <th class="priority-column numeric" scope="col" aria-sort="ascending">
+                    <button class="sort-button is-sorted" data-sort="priority">
+                      GGXGG 选位<span class="sort-icon" aria-hidden="true">↓</span>
+                    </button>
+                  </th>
+                  <th class="detail-column" scope="col"><span class="sr-only">查看详情</span></th>
+                </tr>
+              </thead>
+              <tbody id="ranking-body">
+                <tr class="state-row">
+                  <td colspan="7"><span class="loader"></span>正在整理混合总榜…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <span id="table-status" aria-live="polite">正在读取数据…</span
+            ><button class="button button-outline" id="load-more" hidden>
+              再看 30 项 <span aria-hidden="true">↓</span></button
+            ><span class="table-footer-note">点击名称，查看数据与公式</span>
+          </div>
+        </section>
+
+        <section class="method-notes" aria-label="排行说明">
+          <div class="method-title">
+            <span class="small-mark" aria-hidden="true">∑</span>
+            <h3>排名计算方式</h3>
+          </div>
+          <p>
+            默认规则参考 GGXGG
+            选位公式，将胜率与选位标准化后，按选取频率加权，再换算为选位尺度。技能与英雄模型一起计算并混合排名，搜索、分类或列排序均不会改变总榜名次。
+          </p>
+          <button class="text-button" id="open-method">
+            查看计算规则 <span aria-hidden="true">↗</span>
+          </button>
+        </section>
+
+        <footer class="site-footer">
+          <div>
+            <span class="footer-brand">GGXGG</span><span>技能征召 · 公式选位越低越优先</span>
+          </div>
+          <span id="source-note">数据来源：Windrun · 独立玩家工具</span>
+        </footer>
+      </main>
+    </div>
+
+    <div class="drawer-overlay" id="drawer-overlay" hidden></div>
+    <aside
+      class="drawer"
+      id="formula-drawer"
+      aria-labelledby="formula-title"
+      role="dialog"
+      aria-modal="true"
+      hidden
+    >
+      <div class="drawer-header">
+        <div>
+          <span class="section-eyebrow">自定义计算规则</span>
+          <h2 id="formula-title">调整选位公式</h2>
+        </div>
+        <button class="icon-button close-drawer" aria-label="关闭公式面板">×</button>
+      </div>
+      <div class="drawer-body">
+        <p class="drawer-intro">
+          按你的理解定义优先级。预览当前筛选的前五项及总榜名次，应用后重算全部技能与英雄模型的混合总榜。
+        </p>
+        <form id="formula-form" novalidate>
+          <div class="coefficient-grid">
+            <label class="form-label"
+              >胜率系数<input type="number" id="win-weight" step="any" required /><span
+                >默认 −1，奖励高胜率</span
+              ></label
+            ><label class="form-label"
+              >选位系数<input type="number" id="pick-weight" step="any" required /><span
+                >默认 10，衡量抢手程度</span
+              ></label
+            >
+          </div>
+          <label class="form-label formula-input-label"
+            >原始强度表达式 <span class="input-caption">对应 Excel V 列</span
+            ><textarea id="formula-expression" rows="5" spellcheck="false" required></textarea>
+          </label>
+          <p class="field-help">
+            支持 + − * / ^、ABS、SIGN、SQRT、POWER、MIN、MAX。输入变量区分大小写。
+          </p>
+          <details class="variable-guide">
+            <summary>变量说明与选位换算 <span aria-hidden="true">+</span></summary>
+            <dl>
+              <div>
+                <dt>winZ / pickZ</dt>
+                <dd>胜率 / 平均选位的标准分</dd>
+              </div>
+              <div>
+                <dt>pickFrequency</dt>
+                <dd>选取频率，0 到 1</dd>
+              </div>
+              <div>
+                <dt>winrate / avgPick</dt>
+                <dd>原始胜率 / 平均选位</dd>
+              </div>
+              <div>
+                <dt>winMean / winStd</dt>
+                <dd>总体胜率均值 / 样本标准差</dd>
+              </div>
+              <div>
+                <dt>pickMean / pickStd</dt>
+                <dd>总体选位均值 / 样本标准差</dd>
+              </div>
+              <div>
+                <dt>winWeight / pickWeight</dt>
+                <dd>上方可调系数</dd>
+              </div>
+            </dl>
+            <p>
+              公式选位 = (原始强度 − 总体强度均值) ÷ 总体强度标准差 × 总体选位标准差 +
+              总体选位均值。<br />总体包含英雄模型，和应用内计算保持一致。
+            </p>
+          </details>
+          <div
+            id="formula-feedback"
+            class="formula-feedback"
+            role="status"
+            aria-live="polite"
+          ></div>
+          <button class="button button-outline preview-button" type="button" id="preview-formula">
+            预览排名变化 <span aria-hidden="true">↗</span>
+          </button>
+          <div class="formula-preview" id="formula-preview" hidden></div>
+          <div class="drawer-action-bar">
+            <button class="text-button" type="button" id="reset-formula">恢复 GGXGG 默认</button
+            ><button class="button button-gold" id="apply-formula" type="submit">
+              应用到榜单 <span aria-hidden="true">→</span>
+            </button>
+          </div>
+          <p class="local-save-note">规则仅保存在当前浏览器，不会修改 Windrun 数据。</p>
+        </form>
+      </div>
+    </aside>
+
+    <aside
+      class="drawer"
+      id="detail-drawer"
+      aria-labelledby="detail-title"
+      role="dialog"
+      aria-modal="true"
+      hidden
+    >
+      <div class="drawer-header">
+        <span class="section-eyebrow" id="detail-section-eyebrow">技能数据与计算依据</span
+        ><button class="icon-button close-drawer" id="close-detail" aria-label="关闭技能详情">
+          ×
+        </button>
+      </div>
+      <div class="drawer-body" id="detail-body"></div>
+    </aside>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>

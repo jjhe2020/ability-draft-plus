@@ -3,7 +3,7 @@ node_modules/
 
 # Build output
 out/
-dist/
+/dist/
 # build/* (not build/) so negations below can re-include files — git cannot
 # re-include anything under an excluded directory
 build/*
@@ -33,6 +33,7 @@ twitch/frontend/preview.log
 # IDE
 .vscode/
 .idea/
+.openai/
 *.swp
 *.swo
 

@@ -23,6 +23,8 @@ export default tseslint.config(
       'dist/',
       'node_modules/',
       'scripts/',
+      // Independent static site uses browser/Node ESM and its own test suite.
+      'sites/**',
       '.claude/',
       // twitch/ packages lint themselves (own package.json + config)
       'twitch/**/dist/',
