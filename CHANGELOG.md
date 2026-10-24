@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.1] - 2026-10-24
+
+### Added
+
+- 默认简体中文界面、英雄和技能名称；支持自定义技能选位公式、ggxgg 系数及完整选技池优先级展示。
+- Windrun JSON 快照导入、选取率数据，以及包含英雄模型的中文 GGXGG 排行榜网页。
+- Windows x64 安装版、免安装版和附中文说明的分享 ZIP；每次 main 更新通过检查后自动发布私有 GitHub Release。
+
+### Changed
+
+- 分享版附带统计快照、识别模型及常用布局，首次使用无需开发环境。
+- 发布目标改为个人私有仓库；默认使用分享安装包更新，应用不再自动检查原版更新源。
+
 ## [Unreleased]
 
 ### Changed

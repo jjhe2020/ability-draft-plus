@@ -1,5 +1,19 @@
 # Dota 2 Ability Draft Plus
 
+本仓库为 `jjhe2020` 的中文个人版，基于 [Tiarin Hino 的原项目](https://github.com/Tiarin-Hino/ability-draft-plus) 修改，保留原 ISC 许可证。
+
+### 中文分享版下载与发布
+
+- 在本仓库的 [Releases](https://github.com/jjhe2020/ability-draft-plus/releases) 下载 Windows x64 分享 ZIP，解压后双击 `AbilityDraftPlus-Portable-版本-x64.exe`；也可下载 `AbilityDraftPlus-Setup-版本-x64.exe` 安装。
+- ZIP 包含免安装程序、中文使用说明和许可证；Release 另附安装器、独立免安装程序及 SHA-256 校验文件。无需安装 Node.js。
+- 已附带统计数据、识别模型和常用分辨率布局。默认简体中文，支持单技能选位公式及 ggxgg 系数。
+- 仓库及 Release 为私有。朋友没有仓库权限时，可直接转发 ZIP 或 EXE。此分发版默认关闭应用内自动更新，收到新版安装文件后退出旧版再安装或启动。
+- 每次推送到 `main`，GitHub Actions 会自动执行检查、测试、Windows 打包和应用启动验证；全部通过后自动生成新版 Release。首次使用 `package.json` 的版本，之后递增已发布版本的 patch；同一提交重跑复用原版本。详情见 [发布说明](docs/RELEASING.md)。
+
+本地一键制作分享包：`npm ci` 后执行 `npm run package:release`，成品在 `dist/share/`。排行榜网页及本地图标也保存在 `sites/ggxgg-ranking/`。
+
+下面保留原项目的功能说明；其中原版的在线更新说明不适用于默认配置的中文分享版。
+
 > [!IMPORTANT]
 > **Updating from 2.0.0, 2.0.1, or 2.0.2? Click "Check for Updates" manually.**
 > Those versions do not look for new releases on their own — a feature from the 1.x
@@ -48,20 +62,24 @@ AI-powered overlay for Dota 2's Ability Draft mode. Scans the draft board using 
 
 ### From Release (Recommended)
 
-1. Download the latest installer from [Releases](https://github.com/Tiarin-Hino/ability-draft-plus/releases)
+1. Download the latest installer from [Releases](https://github.com/jjhe2020/ability-draft-plus/releases) (requires repository access)
 2. Run the installer -- choose your install directory
 3. Launch **Dota 2 Ability Draft Plus** from the Start Menu or Desktop shortcut
 
 ### From Source
 
 ```bash
-git clone https://github.com/Tiarin-Hino/ability-draft-plus.git
+git clone https://github.com/jjhe2020/ability-draft-plus.git
 cd ability-draft-plus
 npm install
 npm run dev
 ```
 
 ## Usage
+
+### 中文界面与自定义选位
+
+默认简体中文界面及技能名称。先更新 Windrun 数据，再到“设置 → 单技能选位规则”编辑 ggxgg 系数或完整公式；公式选位越低越强，保存后重新扫描生效。参见 [中文使用说明](docs/CHINESE_CUSTOM_PRIORITY.md)。
 
 ### First Time Setup
 
@@ -133,6 +151,7 @@ The app automatically detects your game resolution and selects the correct coord
 | `npm run dev` | Start development server with hot reload |
 | `npm run build` | Build all targets (main, preload, renderer) |
 | `npm run build:dist` | Build and package as Windows installer |
+| `npm run package:release` | Build Windows installer, portable EXE, share ZIP and checksums in `dist/share/` |
 | `npm start` | Run the built application |
 | `npm test` | Run all unit/integration tests |
 | `npm run test:e2e` | Run Playwright E2E tests |

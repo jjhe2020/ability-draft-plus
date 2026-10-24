@@ -2,6 +2,7 @@ import { app } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import log from 'electron-log/main'
 import type { AppStore } from '../store/app-store'
+import { loadAutoUpdateEnabled } from './api-config'
 
 // @DEV-GUIDE: Wires electron-updater's autoUpdater to the AppStore.
 // autoUpdater checks GitHub Releases for new versions (configured in electron-builder.yml).
@@ -30,6 +31,27 @@ export interface UpdateService {
 }
 
 export function createUpdateService(appStore: AppStore): UpdateService {
+  if (!loadAutoUpdateEnabled()) {
+    function showManualUpdateInfo(): void {
+      appStore.setState({
+        updateStatus: 'error',
+        updateError: '此分享版通过安装包更新，请联系分享者获取新版安装包并安装。',
+        updateProgress: null,
+        updateVersion: null,
+      })
+    }
+
+    return {
+      checkForUpdates: showManualUpdateInfo,
+      downloadUpdate: showManualUpdateInfo,
+      installUpdate: showManualUpdateInfo,
+      startPeriodicChecks() {
+        logger.info('Automatic updates disabled; update using a shared installer')
+      },
+      stopPeriodicChecks() {},
+    }
+  }
+
   autoUpdater.logger = log
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = true

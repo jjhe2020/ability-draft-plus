@@ -15,9 +15,11 @@ const config = {
   CLIENT_TAG: process.env.CLIENT_TAG || '',
   // Optional override; empty => the app's DEFAULT_TWITCH_EBS_URL
   TWITCH_EBS_URL: process.env.TWITCH_EBS_URL || '',
+  // Private releases are shared as installers; enable only with an accessible update feed.
+  AUTO_UPDATE_ENABLED: process.env.AUTO_UPDATE_ENABLED === 'true',
 }
 
-const OPTIONAL_KEYS = new Set(['TWITCH_EBS_URL'])
+const OPTIONAL_KEYS = new Set(['TWITCH_EBS_URL', 'AUTO_UPDATE_ENABLED'])
 
 const missing = Object.entries(config)
   .filter(([k, v]) => !v && !OPTIONAL_KEYS.has(k))

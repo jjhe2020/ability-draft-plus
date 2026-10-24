@@ -38,12 +38,16 @@ win:
       arch:
         - x64
 nsis:
+  artifactName: "AbilityDraftPlus-Setup-${version}-${arch}.${ext}"
   oneClick: false
   allowToChangeInstallationDirectory: true
   perMachine: false
   createDesktopShortcut: true
   createStartMenuShortcut: true
+portable:
+  artifactName: "AbilityDraftPlus-Portable-${version}-${arch}.${ext}"
 publish:
   provider: github
-  owner: tiarin-hino
+  owner: jjhe2020
   repo: ability-draft-plus
+  private: true

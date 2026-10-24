@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
-    branches: ['*']
+    # Main receives the same checks in Release, followed by the distributable
+    # build. Avoid paying for two complete Windows builds on every main push.
+    branches-ignore: [main]
   pull_request:
     branches: [main]
 
@@ -19,6 +21,8 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+      - run: npm test --prefix sites/ggxgg-ranking
+      - run: node --test scripts/release-version.test.mjs
 
   build:
     needs: quality

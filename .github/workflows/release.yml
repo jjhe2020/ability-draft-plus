@@ -2,51 +2,99 @@ name: Release
 
 on:
   push:
+    branches: [main]
     tags: ['v*']
+  workflow_dispatch:
+
+# Only one build may allocate a version and publish at a time.
+concurrency:
+  group: windows-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
   release:
+    if: github.repository == 'jjhe2020/ability-draft-plus'
     runs-on: windows-latest
-    permissions:
-      contents: write
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: npm
       - run: npm ci
+      - name: Verify release version allocation
+        run: node --test scripts/release-version.test.mjs
+      - name: Allocate or reuse release version
+        id: version
+        run: node scripts/release-version.mjs
+      # The source tree keeps its base version. The package built in this run
+      # receives the allocated version, without a bot commit or another push.
+      - name: Set packaged application version
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: npm version $env:RELEASE_VERSION --no-git-tag-version --ignore-scripts --allow-same-version
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
-      # NOTE: no separate `npm run prebuild` step. `prebuild` is an npm lifecycle
-      # script, so `npm run build` runs it automatically — and a prebuild step
-      # without this env block used to regenerate app-config.json with EMPTY
-      # values right after the configured one wrote it, silently shipping a
-      # build with no credentials. Keep the env on the step that builds.
-      - run: npm run build
+      - run: npm test --prefix sites/ggxgg-ranking
+      - name: Build installer and shareable bundle
+        run: npm run package:release
+      - name: Run application smoke tests
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AbilityDraftPlus-${{ steps.version.outputs.version }}-Windows-x64
+          path: dist/share/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Publish completed release to this private repository
         env:
-          API_ENDPOINT_URL: ${{ secrets.API_ENDPOINT_URL }}
-          CLIENT_API_KEY: ${{ secrets.CLIENT_API_KEY }}
-          CLIENT_SHARED_SECRET: ${{ secrets.CLIENT_SHARED_SECRET }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          CLIENT_TAG: ${{ secrets.CLIENT_TAG }}
-      - name: Convert pre-existing release to draft
-        # electron-builder requires the release to be a draft (or non-existent) before it can
-        # upload assets. If we pre-created a published release (e.g. via gh release create),
-        # electron-builder skips all uploads with "existing type not compatible with publishing type".
-        # Converting to draft first lets electron-builder upload and then publish it normally.
-        run: gh release edit ${{ github.ref_name }} --draft 2>$null; exit 0
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npx electron-builder --win --publish=always
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $requiredFiles = @(
+            "AbilityDraftPlus-Setup-$env:RELEASE_VERSION-x64.exe",
+            "AbilityDraftPlus-Portable-$env:RELEASE_VERSION-x64.exe",
+            "AbilityDraftPlus-$env:RELEASE_VERSION-Windows-x64.zip",
+            '使用说明.txt',
+            'SHA256SUMS.txt',
+            'release-notes.md'
+          )
+          foreach ($name in $requiredFiles) {
+            if (-not (Test-Path -LiteralPath (Join-Path 'dist/share' $name) -PathType Leaf)) {
+              throw "Required release file is missing: $name"
+            }
+          }
+          $assets = @(Get-ChildItem -LiteralPath 'dist/share' -File | Where-Object Name -ne 'release-notes.md' | ForEach-Object FullName)
+          $notesPath = 'dist/share/release-notes.md'
 
-      - name: Upload source maps to Sentry
-        if: env.SENTRY_AUTH_TOKEN != ''
-        run: npx @sentry/cli sourcemaps upload --release="ability-draft-plus@${{ github.ref_name }}" ./out
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          $existing = gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --json isDraft,url 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            $release = $existing | ConvertFrom-Json
+            if (-not $release.isDraft) {
+              "This commit has already been released: $($release.url)" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+              exit 0
+            }
+          } else {
+            gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Ability Draft Plus $env:RELEASE_TAG" --notes-file $notesPath --draft
+            if ($LASTEXITCODE -ne 0) { throw 'Could not create the draft release.' }
+          }
+
+          gh release upload $env:RELEASE_TAG @assets --repo $env:GITHUB_REPOSITORY --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Asset upload failed; the release remains a draft for a safe retry.' }
+          gh release edit $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --notes-file $notesPath --draft=false --latest
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish the completed release.' }
+          "Release: https://github.com/$env:GITHUB_REPOSITORY/releases/tag/$env:RELEASE_TAG" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY

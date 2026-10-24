@@ -133,6 +133,25 @@ export function loadSentryDsn(): string | undefined {
   }
 }
 
+/** Private distribution defaults to installer sharing instead of an authenticated update feed. */
+export function loadAutoUpdateEnabled(): boolean {
+  if (app.isPackaged) {
+    try {
+      const configPath = join(process.resourcesPath, 'app-config.json')
+      const data = JSON.parse(readFileSync(configPath, 'utf-8'))
+      return data.AUTO_UPDATE_ENABLED === true
+    } catch {
+      return false
+    }
+  }
+  const envPath = resolve(app.getAppPath(), '.env')
+  if (existsSync(envPath)) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('dotenv').config({ path: envPath })
+  }
+  return process.env.AUTO_UPDATE_ENABLED === 'true'
+}
+
 /**
  * Generate HMAC SHA256 signature for API authentication.
  * String to sign: "{METHOD}\n{PATH}\n{TIMESTAMP}\n{NONCE}\n{API_KEY}"
